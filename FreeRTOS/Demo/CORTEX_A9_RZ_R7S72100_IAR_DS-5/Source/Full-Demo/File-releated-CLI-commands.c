@@ -1,75 +1,70 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
-    FEATURES AND PORTS ARE ADDED TO FREERTOS ALL THE TIME.  PLEASE VISIT
-    http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS tutorial books are available in pdf and paperback.        *
-     *    Complete, revised, and edited pdf reference manuals are also       *
-     *    available.                                                         *
-     *                                                                       *
-     *    Purchasing FreeRTOS documentation will not only help you, by       *
-     *    ensuring you get running as quickly as possible and with an        *
-     *    in-depth knowledge of how to use FreeRTOS, it will also help       *
-     *    the FreeRTOS project to continue with its mission of providing     *
-     *    professional grade, cross platform, de facto standard solutions    *
-     *    for microcontrollers - completely free of charge!                  *
-     *                                                                       *
-     *    >>> See http://www.FreeRTOS.org/Documentation for details. <<<     *
-     *                                                                       *
-     *    Thank you for using FreeRTOS, and thank you for your support!      *
-     *                                                                       *
-    ***************************************************************************
-
+    VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
 
     This file is part of the FreeRTOS distribution.
 
     FreeRTOS is free software; you can redistribute it and/or modify it under
     the terms of the GNU General Public License (version 2) as published by the
-    Free Software Foundation AND MODIFIED BY the FreeRTOS exception.
+    Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>>>>>NOTE<<<<<< The modification to the GPL is included to allow you to
-    distribute a combined work that includes FreeRTOS without being obliged to
-    provide the source code for proprietary components outside of the FreeRTOS
-    kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-    details. You should have received a copy of the GNU General Public License
-    and the FreeRTOS license exception along with FreeRTOS; if not itcan be
-    viewed here: http://www.freertos.org/a00114.html and also obtained by
-    writing to Real Time Engineers Ltd., contact details for whom are available
-    on the FreeRTOS WEB site.
-
-    1 tab == 4 spaces!
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
+    link: http://www.freertos.org/a00114.html
 
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
-    including FreeRTOS+Trace - an indispensable productivity tool, and our new
-    fully thread aware and reentrant UDP/IP stack.
+    including FreeRTOS+Trace - an indispensable productivity tool, a DOS
+    compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems, who sell the code with commercial support,
-    indemnification and middleware, under the OpenRTOS brand.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
     mission critical applications that require provable dependability.
+
+    1 tab == 4 spaces!
 */
 
 /* FreeRTOS includes. */
@@ -103,41 +98,41 @@
 /*
  * Print out information on a single file.
  */
-static void prvCreateFileInfoString( int8_t *pcBuffer, F_FIND *pxFindStruct );
+static void prvCreateFileInfoString( char *pcBuffer, F_FIND *pxFindStruct );
 
 /*
  * Copies an existing file into a newly created file.
  */
-static portBASE_TYPE prvPerformCopy( int8_t *pcSourceFile,
-							int32_t lSourceFileLength,
-							int8_t *pcDestinationFile,
-							int8_t *pxWriteBuffer,
-							size_t xWriteBufferLen );
+static portBASE_TYPE prvPerformCopy( char *pcSourceFile,
+									int32_t lSourceFileLength,
+									char *pcDestinationFile,
+									char *pxWriteBuffer,
+									size_t xWriteBufferLen );
 
 /*
  * Implements the DIR command.
  */
-static portBASE_TYPE prvDIRCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
+static portBASE_TYPE prvDIRCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Implements the CD command.
  */
-static portBASE_TYPE prvCDCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
+static portBASE_TYPE prvCDCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Implements the DEL command.
  */
-static portBASE_TYPE prvDELCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
+static portBASE_TYPE prvDELCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Implements the TYPE command.
  */
-static portBASE_TYPE prvTYPECommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
+static portBASE_TYPE prvTYPECommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Implements the COPY command.
  */
-static portBASE_TYPE prvCOPYCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
+static portBASE_TYPE prvCOPYCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Registers the CLI commands that are specific to the files system with the
@@ -206,9 +201,9 @@ void vRegisterFileSystemCLICommands( void )
 }
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE prvTYPECommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
+static portBASE_TYPE prvTYPECommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
-int8_t *pcParameter;
+const char *pcParameter;
 portBASE_TYPE xParameterStringLength, xReturn = pdTRUE;
 static F_FILE *pxFile = NULL;
 int iChar;
@@ -232,18 +227,18 @@ size_t xColumns = 50U;
 	if( pxFile == NULL )
 	{
 		/* The file has not been opened yet.  Find the file name. */
-		pcParameter = ( int8_t * ) FreeRTOS_CLIGetParameter
-									(
-										pcCommandString,		/* The command string itself. */
-										1,						/* Return the first parameter. */
-										&xParameterStringLength	/* Store the parameter string length. */
-									);
+		pcParameter = FreeRTOS_CLIGetParameter
+								(
+									pcCommandString,		/* The command string itself. */
+									1,						/* Return the first parameter. */
+									&xParameterStringLength	/* Store the parameter string length. */
+								);
 
 		/* Sanity check something was returned. */
 		configASSERT( pcParameter );
 
 		/* Attempt to open the requested file. */
-		pxFile = f_open( ( const char * ) pcParameter, "r" );
+		pxFile = f_open( pcParameter, "r" );
 	}
 
 	if( pxFile != NULL )
@@ -262,7 +257,7 @@ size_t xColumns = 50U;
 			}
 			else
 			{
-				pcWriteBuffer[ xByte ] = ( int8_t ) iChar;
+				pcWriteBuffer[ xByte ] = ( char ) iChar;
 			}
 		}
 	}
@@ -274,51 +269,51 @@ size_t xColumns = 50U;
 		xReturn = pdFALSE;
 	}
 
-	strcat( ( char * ) pcWriteBuffer, cliNEW_LINE );
+	strcat( pcWriteBuffer, cliNEW_LINE );
 
 	return xReturn;
 }
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE prvCDCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
+static portBASE_TYPE prvCDCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
-int8_t *pcParameter;
+const char *pcParameter;
 portBASE_TYPE xParameterStringLength;
 unsigned char ucReturned;
 size_t xStringLength;
 
 	/* Obtain the parameter string. */
-	pcParameter = ( int8_t * ) FreeRTOS_CLIGetParameter
-								(
-									pcCommandString,		/* The command string itself. */
-									1,						/* Return the first parameter. */
-									&xParameterStringLength	/* Store the parameter string length. */
-								);
+	pcParameter = FreeRTOS_CLIGetParameter
+						(
+							pcCommandString,		/* The command string itself. */
+							1,						/* Return the first parameter. */
+							&xParameterStringLength	/* Store the parameter string length. */
+						);
 
 	/* Sanity check something was returned. */
 	configASSERT( pcParameter );
 
 	/* Attempt to move to the requested directory. */
-	ucReturned = f_chdir( ( char * ) pcParameter );
+	ucReturned = f_chdir( pcParameter );
 
 	if( ucReturned == F_NO_ERROR )
 	{
-		sprintf( ( char * ) pcWriteBuffer, "In: " );
-		xStringLength = strlen( ( const char * ) pcWriteBuffer );
-		f_getcwd( ( char * ) &( pcWriteBuffer[ xStringLength ] ), ( unsigned char ) ( xWriteBufferLen - xStringLength ) );
+		sprintf( pcWriteBuffer, "In: " );
+		xStringLength = strlen( pcWriteBuffer );
+		f_getcwd( &( pcWriteBuffer[ xStringLength ] ), ( unsigned char ) ( xWriteBufferLen - xStringLength ) );
 	}
 	else
 	{
-		sprintf( ( char * ) pcWriteBuffer, "Error" );
+		sprintf( pcWriteBuffer, "Error" );
 	}
 
-	strcat( ( char * ) pcWriteBuffer, cliNEW_LINE );
+	strcat( pcWriteBuffer, cliNEW_LINE );
 
 	return pdFALSE;
 }
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE prvDIRCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
+static portBASE_TYPE prvDIRCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
 static F_FIND *pxFindStruct = NULL;
 unsigned char ucReturned;
@@ -348,12 +343,12 @@ portBASE_TYPE xReturn = pdFALSE;
 			}
 			else
 			{
-				snprintf( ( char * ) pcWriteBuffer, xWriteBufferLen, "Error: f_findfirst() failed." );
+				snprintf( pcWriteBuffer, xWriteBufferLen, "Error: f_findfirst() failed." );
 			}
 		}
 		else
 		{
-			snprintf( ( char * ) pcWriteBuffer, xWriteBufferLen, "Failed to allocate RAM (using heap_4.c will prevent fragmentation)." );
+			snprintf( pcWriteBuffer, xWriteBufferLen, "Failed to allocate RAM (using heap_4.c will prevent fragmentation)." );
 		}
 	}
 	else
@@ -378,15 +373,15 @@ portBASE_TYPE xReturn = pdFALSE;
 		}
 	}
 
-	strcat( ( char * ) pcWriteBuffer, cliNEW_LINE );
+	strcat( pcWriteBuffer, cliNEW_LINE );
 
 	return xReturn;
 }
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE prvDELCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
+static portBASE_TYPE prvDELCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
-int8_t *pcParameter;
+const char *pcParameter;
 portBASE_TYPE xParameterStringLength;
 unsigned char ucReturned;
 
@@ -394,58 +389,58 @@ unsigned char ucReturned;
 	( void ) xWriteBufferLen;
 
 	/* Obtain the parameter string. */
-	pcParameter = ( int8_t * ) FreeRTOS_CLIGetParameter
-								(
-									pcCommandString,		/* The command string itself. */
-									1,						/* Return the first parameter. */
-									&xParameterStringLength	/* Store the parameter string length. */
-								);
+	pcParameter = FreeRTOS_CLIGetParameter
+						(
+							pcCommandString,		/* The command string itself. */
+							1,						/* Return the first parameter. */
+							&xParameterStringLength	/* Store the parameter string length. */
+						);
 
 	/* Sanity check something was returned. */
 	configASSERT( pcParameter );
 
 	/* Attempt to delete the file. */
-	ucReturned = f_delete( ( const char * ) pcParameter );
+	ucReturned = f_delete( pcParameter );
 
 	if( ucReturned == F_NO_ERROR )
 	{
-		sprintf( ( char * ) pcWriteBuffer, "%s was deleted", pcParameter );
+		sprintf( pcWriteBuffer, "%s was deleted", pcParameter );
 	}
 	else
 	{
-		sprintf( ( char * ) pcWriteBuffer, "Error" );
+		sprintf( pcWriteBuffer, "Error" );
 	}
 
-	strcat( ( char * ) pcWriteBuffer, cliNEW_LINE );
+	strcat( pcWriteBuffer, cliNEW_LINE );
 
 	return pdFALSE;
 }
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE prvCOPYCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
+static portBASE_TYPE prvCOPYCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
-int8_t *pcSourceFile, *pcDestinationFile;
+char *pcSourceFile, *pcDestinationFile;
 portBASE_TYPE xParameterStringLength;
 long lSourceLength, lDestinationLength = 0;
 
 	/* Obtain the name of the destination file. */
-	pcDestinationFile = ( int8_t * ) FreeRTOS_CLIGetParameter
-								(
-									pcCommandString,		/* The command string itself. */
-									2,						/* Return the second parameter. */
-									&xParameterStringLength	/* Store the parameter string length. */
-								);
+	pcDestinationFile = ( char * ) FreeRTOS_CLIGetParameter
+							(
+								pcCommandString,		/* The command string itself. */
+								2,						/* Return the second parameter. */
+								&xParameterStringLength	/* Store the parameter string length. */
+							);
 
 	/* Sanity check something was returned. */
 	configASSERT( pcDestinationFile );
 
 	/* Obtain the name of the source file. */
-	pcSourceFile = ( int8_t * ) FreeRTOS_CLIGetParameter
-								(
-									pcCommandString,		/* The command string itself. */
-									1,						/* Return the first parameter. */
-									&xParameterStringLength	/* Store the parameter string length. */
-								);
+	pcSourceFile = ( char * ) FreeRTOS_CLIGetParameter
+						(
+							pcCommandString,		/* The command string itself. */
+							1,						/* Return the first parameter. */
+							&xParameterStringLength	/* Store the parameter string length. */
+						);
 
 	/* Sanity check something was returned. */
 	configASSERT( pcSourceFile );
@@ -454,20 +449,20 @@ long lSourceLength, lDestinationLength = 0;
 	pcSourceFile[ xParameterStringLength ] = 0x00;
 
 	/* See if the source file exists, obtain its length if it does. */
-	lSourceLength = f_filelength( ( const char * ) pcSourceFile );
+	lSourceLength = f_filelength( pcSourceFile );
 
 	if( lSourceLength == 0 )
 	{
-		sprintf( ( char * ) pcWriteBuffer, "Source file does not exist" );
+		sprintf( pcWriteBuffer, "Source file does not exist" );
 	}
 	else
 	{
 		/* See if the destination file exists. */
-		lDestinationLength = f_filelength( ( const char * ) pcDestinationFile );
+		lDestinationLength = f_filelength( pcDestinationFile );
 
 		if( lDestinationLength != 0 )
 		{
-			sprintf( ( char * ) pcWriteBuffer, "Error: Destination file already exists" );
+			sprintf( pcWriteBuffer, "Error: Destination file already exists" );
 		}
 	}
 
@@ -477,25 +472,25 @@ long lSourceLength, lDestinationLength = 0;
 	{
 		if( prvPerformCopy( pcSourceFile, lSourceLength, pcDestinationFile, pcWriteBuffer, xWriteBufferLen ) == pdPASS )
 		{
-			sprintf( ( char * ) pcWriteBuffer, "Copy made" );
+			sprintf( pcWriteBuffer, "Copy made" );
 		}
 		else
 		{
-			sprintf( ( char * ) pcWriteBuffer, "Error during copy" );
+			sprintf( pcWriteBuffer, "Error during copy" );
 		}
 	}
 
-	strcat( ( char * ) pcWriteBuffer, cliNEW_LINE );
+	strcat( pcWriteBuffer, cliNEW_LINE );
 
 	return pdFALSE;
 }
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE prvPerformCopy( int8_t *pcSourceFile,
-							int32_t lSourceFileLength,
-							int8_t *pcDestinationFile,
-							int8_t *pxWriteBuffer,
-							size_t xWriteBufferLen )
+static portBASE_TYPE prvPerformCopy( 	char *pcSourceFile,
+										int32_t lSourceFileLength,
+										char *pcDestinationFile,
+										char *pxWriteBuffer,
+										size_t xWriteBufferLen )
 {
 int32_t lBytesRead = 0, lBytesToRead, lBytesRemaining;
 F_FILE *pxFile;
@@ -522,7 +517,7 @@ portBASE_TYPE xReturn = pdPASS;
 		/* Open the source file, seek past the data that has already been
 		read from the file, read the next block of data, then close the
 		file again so the destination file can be opened. */
-		pxFile = f_open( ( const char * ) pcSourceFile, "r" );
+		pxFile = f_open( pcSourceFile, "r" );
 		if( pxFile != NULL )
 		{
 			f_seek( pxFile, lBytesRead, F_SEEK_SET );
@@ -537,7 +532,7 @@ portBASE_TYPE xReturn = pdPASS;
 
 		/* Open the destination file and write the block of data to the end of
 		the file. */
-		pxFile = f_open( ( const char * ) pcDestinationFile, "a" );
+		pxFile = f_open( pcDestinationFile, "a" );
 		if( pxFile != NULL )
 		{
 			f_write( pxWriteBuffer, lBytesToRead, 1, pxFile );
@@ -556,7 +551,7 @@ portBASE_TYPE xReturn = pdPASS;
 }
 /*-----------------------------------------------------------*/
 
-static void prvCreateFileInfoString( int8_t *pcBuffer, F_FIND *pxFindStruct )
+static void prvCreateFileInfoString( char *pcBuffer, F_FIND *pxFindStruct )
 {
 const char *pcWritableFile = "writable file", *pcReadOnlyFile = "read only file", *pcDirectory = "directory";
 const char * pcAttrib;
@@ -577,5 +572,5 @@ const char * pcAttrib;
 
 	/* Create a string that includes the file name, the file size and the
 	attributes string. */
-	sprintf( ( char * ) pcBuffer, "%s [%s] [size=%d]", pxFindStruct->filename, pcAttrib, pxFindStruct->filesize );
+	sprintf( pcBuffer, "%s [%s] [size=%d]", pxFindStruct->filename, pcAttrib, pxFindStruct->filesize );
 }

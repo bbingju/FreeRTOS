@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -95,13 +100,13 @@
  * along with the max jitter time to the LCD (again via the LCD task), as
  * described above.
  *
- * Tick Hook - A tick hook is provided just for demonstration purposes.  In 
+ * Tick Hook - A tick hook is provided just for demonstration purposes.  In
  * this case it is used to periodically send an instruction to updated the
  * MEMS input to the LCD task.
  *
  */
 
-/* CircleOS includes.  Some of the CircleOS peripheral functionality is 
+/* CircleOS includes.  Some of the CircleOS peripheral functionality is
 utilised, although CircleOS itself is not used. */
 #include "circle.h"
 
@@ -142,7 +147,7 @@ extra code. */
 #define mainBITMAP_X						( 18 )
 #define mainURL_Y							( 8 )
 #define mainURL_X							( 78 )
-#define mainSPLASH_SCREEN_DELAY		( 2000 / portTICK_RATE_MS )
+#define mainSPLASH_SCREEN_DELAY		( 2000 / portTICK_PERIOD_MS )
 
 /* Text drawing related constants. */
 #define mainLCD_CHAR_HEIGHT			( 13 )
@@ -163,16 +168,16 @@ these can require a larger stack. */
 #define mainMAX_MSG_LEN						25
 
 /* The time between cycles of the 'check' task. */
-#define mainCHECK_DELAY						( ( portTickType ) 5000 / portTICK_RATE_MS )
+#define mainCHECK_DELAY						( ( TickType_t ) 5000 / portTICK_PERIOD_MS )
 
 /* The period at which the MEMS input should be updated. */
-#define mainMEMS_DELAY						( ( portTickType ) 100 / portTICK_RATE_MS )
+#define mainMEMS_DELAY						( ( TickType_t ) 100 / portTICK_PERIOD_MS )
 
 /* The rate at which the flash task toggles the LED. */
-#define mainFLASH_DELAY						( ( portTickType ) 1000 / portTICK_RATE_MS )
+#define mainFLASH_DELAY						( ( TickType_t ) 1000 / portTICK_PERIOD_MS )
 
 /* The number of nano seconds between each processor clock. */
-#define mainNS_PER_CLOCK ( ( unsigned portLONG ) ( ( 1.0 / ( double ) configCPU_CLOCK_HZ ) * 1000000000.0 ) )
+#define mainNS_PER_CLOCK ( ( unsigned long ) ( ( 1.0 / ( double ) configCPU_CLOCK_HZ ) * 1000000000.0 ) )
 
 /* The two types of message that can be sent to the LCD task. */
 #define mainUPDATE_BALL_MESSAGE				( 0 )
@@ -223,7 +228,7 @@ extern void vSetupTimerTest( void );
 
 /*
  * A cut down version of sprintf() used to percent the HUGE GCC library
- * equivalent from being included in the binary image. 
+ * equivalent from being included in the binary image.
  */
 extern int sprintf(char *out, const char *format, ...);
 
@@ -235,7 +240,7 @@ static void prvFlashTask( void *pvParameters );
 /*-----------------------------------------------------------*/
 
 /* The queue used to send messages to the LCD task. */
-xQueueHandle xLCDQueue;
+QueueHandle_t xLCDQueue;
 
 /*-----------------------------------------------------------*/
 
@@ -250,7 +255,7 @@ int main( void )
 	/* Create the queue used by the LCD task.  Messages for display on the LCD
 	are received via this queue. */
 	xLCDQueue = xQueueCreate( mainLCD_QUEUE_SIZE, sizeof( xLCDMessage ) );
-	
+
 	/* Start the standard demo tasks. */
 	vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
     vCreateBlockTimeTasks();
@@ -259,16 +264,16 @@ int main( void )
 	vStartPolledQueueTasks( mainQUEUE_POLL_PRIORITY );
 
 	/* Start the tasks defined within this file/specific to this demo. */
-    xTaskCreate( prvCheckTask, ( signed portCHAR * ) "Check", mainCHECK_TASK_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );	
-	xTaskCreate( prvLCDTask, ( signed portCHAR * ) "LCD", configLCD_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
-	xTaskCreate( prvFlashTask, ( signed portCHAR * ) "Flash", configMINIMAL_STACK_SIZE, NULL, mainFLASH_TASK_PRIORITY, NULL );
+    xTaskCreate( prvCheckTask, "Check", mainCHECK_TASK_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
+	xTaskCreate( prvLCDTask, "LCD", configLCD_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
+	xTaskCreate( prvFlashTask, "Flash", configMINIMAL_STACK_SIZE, NULL, mainFLASH_TASK_PRIORITY, NULL );
 
 	/* Configure the timers used by the fast interrupt timer test. */
 	vSetupTimerTest();
-	
+
 	/* Start the scheduler. */
 	vTaskStartScheduler();
-	
+
 	/* Will only get here if there was not enough heap space to create the
 	idle task. */
 	return 0;
@@ -278,9 +283,9 @@ int main( void )
 void prvLCDTask( void *pvParameters )
 {
 xLCDMessage xMessage;
-portCHAR cY = mainLCD_CHAR_HEIGHT;
-const portCHAR * const pcString = "www.FreeRTOS.org";
-const portCHAR * const pcBlankLine = "                  ";
+char cY = mainLCD_CHAR_HEIGHT;
+const char * const pcString = "www.FreeRTOS.org";
+const char * const pcBlankLine = "                  ";
 
 	DRAW_Init();
 
@@ -313,11 +318,11 @@ const portCHAR * const pcBlankLine = "                  ";
 
 			cY -= mainLCD_CHAR_HEIGHT;
 			if( cY <= ( mainLCD_CHAR_HEIGHT - 1 ) )
-			{			
+			{
 				/* Wrap the line onto which we are going to write the text. */
 				cY = mainLCD_MAX_Y;
 			}
-			
+
 			/* Display the message. */
 			DRAW_DisplayString( 0, cY, xMessage.pcMessage, strlen( xMessage.pcMessage ) );
 		}
@@ -327,10 +332,10 @@ const portCHAR * const pcBlankLine = "                  ";
 
 static void prvCheckTask( void *pvParameters )
 {
-portTickType xLastExecutionTime;
+TickType_t xLastExecutionTime;
 xLCDMessage xMessage;
-static signed portCHAR cPassMessage[ mainMAX_MSG_LEN ];
-extern unsigned portSHORT usMaxJitter;
+static signed char cPassMessage[ mainMAX_MSG_LEN ];
+extern unsigned short usMaxJitter;
 
 	/* Initialise the xLastExecutionTime variable on task entry. */
 	xLastExecutionTime = xTaskGetTickCount();
@@ -338,7 +343,7 @@ extern unsigned portSHORT usMaxJitter;
 	/* Setup the message we are going to send to the LCD task. */
 	xMessage.xMessageType = mainWRITE_STRING_MESSAGE;
 	xMessage.pcMessage = cPassMessage;
-	
+
     for( ;; )
 	{
 		/* Perform this check every mainCHECK_DELAY milliseconds. */
@@ -373,7 +378,7 @@ extern unsigned portSHORT usMaxJitter;
 			with the max measured jitter time also included (as per the
 			fast interrupt test described at the top of this file and on
 			the online documentation page for this demo application). */
-			sprintf( ( portCHAR * ) cPassMessage, "PASS [%uns]", ( ( unsigned portLONG ) usMaxJitter ) * mainNS_PER_CLOCK );
+			sprintf( ( char * ) cPassMessage, "PASS [%uns]", ( ( unsigned long ) usMaxJitter ) * mainNS_PER_CLOCK );
 		}
 
 		/* Send the message to the LCD gatekeeper for display. */
@@ -384,7 +389,7 @@ extern unsigned portSHORT usMaxJitter;
 
 void vApplicationTickHook( void )
 {
-static unsigned portLONG ulCallCount;
+static unsigned long ulCallCount;
 static const xLCDMessage xMemsMessage = { mainUPDATE_BALL_MESSAGE, NULL };
 static portBASE_TYPE xHigherPriorityTaskWoken;
 
@@ -414,7 +419,7 @@ static void prvSetupHardware( void )
 	}
 
 	/* 2 wait states required on the flash. */
-	*( ( unsigned portLONG * ) 0x40022000 ) = 0x02;
+	*( ( unsigned long * ) 0x40022000 ) = 0x02;
 
 	/* HCLK = SYSCLK */
 	RCC_HCLKConfig( RCC_SYSCLK_Div1 );
@@ -456,10 +461,10 @@ static void prvSetupHardware( void )
 	NVIC_SetVectorTable( NVIC_VectTab_FLASH, 0x0 );
 
 	NVIC_PriorityGroupConfig( NVIC_PriorityGroup_4 );
-	
+
 	/* Configure HCLK clock as SysTick clock source. */
 	SysTick_CLKSourceConfig( SysTick_CLKSource_HCLK );
-	
+
 	/* Misc initialisation, including some of the CircleOS features.  Note
 	that CircleOS itself is not used. */
 	vParTestInitialise();
@@ -471,7 +476,7 @@ static void prvSetupHardware( void )
 
 static void prvFlashTask( void *pvParameters )
 {
-portTickType xLastExecutionTime;
+TickType_t xLastExecutionTime;
 
 	/* Initialise the xLastExecutionTime variable on task entry. */
 	xLastExecutionTime = xTaskGetTickCount();
@@ -488,7 +493,7 @@ portTickType xLastExecutionTime;
 
 void starting_delay( unsigned long ul )
 {
-	vTaskDelay( ( portTickType ) ul );
+	vTaskDelay( ( TickType_t ) ul );
 }
 
 

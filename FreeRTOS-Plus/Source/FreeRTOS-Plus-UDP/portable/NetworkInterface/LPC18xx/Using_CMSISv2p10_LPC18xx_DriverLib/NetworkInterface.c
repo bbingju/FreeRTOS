@@ -1,5 +1,6 @@
 /*
- * FreeRTOS+UDP V1.0.0 (C) 2013 Real Time Engineers ltd.
+ * FreeRTOS+UDP V1.0.4 (C) 2014 Real Time Engineers ltd.
+ * All rights reserved
  *
  * This file is part of the FreeRTOS+UDP distribution.  The FreeRTOS+UDP license
  * terms are different to the FreeRTOS license terms.
@@ -18,9 +19,9 @@
  *
  * - Commercial licensing -
  * Businesses and individuals that for commercial or other reasons cannot comply
- * with the terms of the GPL V2 license must obtain a commercial license before 
- * incorporating FreeRTOS+UDP into proprietary software for distribution in any 
- * form.  Commercial licenses can be purchased from http://shop.freertos.org/udp 
+ * with the terms of the GPL V2 license must obtain a commercial license before
+ * incorporating FreeRTOS+UDP into proprietary software for distribution in any
+ * form.  Commercial licenses can be purchased from http://shop.freertos.org/udp
  * and do not require any source files to be changed.
  *
  * FreeRTOS+UDP is distributed in the hope that it will be useful.  You cannot
@@ -58,10 +59,6 @@
 /* Demo includes. */
 #include "NetworkInterface.h"
 
-#if configMAC_INTERRUPT_PRIORITY > configMAC_INTERRUPT_PRIORITY
-	#error configMAC_INTERRUPT_PRIORITY must be greater than or equal to configMAC_INTERRUPT_PRIORITY (higher numbers mean lower logical priority)
-#endif
-
 #ifndef configNUM_RX_ETHERNET_DMA_DESCRIPTORS
 	#error configNUM_RX_ETHERNET_DMA_DESCRIPTORS must be defined in FreeRTOSConfig.h to set the number of RX DMA descriptors
 #endif
@@ -74,7 +71,7 @@
 operation will be held in the Blocked state (so other tasks can execute) for
 niTX_BUFFER_FREE_WAIT ticks.  It will do this a maximum of niMAX_TX_ATTEMPTS
 before giving up. */
-#define niTX_BUFFER_FREE_WAIT	( ( portTickType ) 2UL / portTICK_RATE_MS )
+#define niTX_BUFFER_FREE_WAIT	( ( TickType_t ) 2UL / portTICK_RATE_MS )
 #define niMAX_TX_ATTEMPTS		( 5 )
 
 /*-----------------------------------------------------------*/
@@ -95,10 +92,10 @@ static xSemaphoreHandle xEMACRxEventSemaphore = NULL;
 
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xNetworkInterfaceInitialise( void )
+BaseType_t xNetworkInterfaceInitialise( void )
 {
 EMAC_CFG_Type Emac_Config;
-portBASE_TYPE xReturn;
+BaseType_t xReturn;
 extern uint8_t ucMACAddress[ 6 ];
 
 	Emac_Config.pbEMAC_Addr = ucMACAddress;
@@ -127,7 +124,7 @@ extern uint8_t ucMACAddress[ 6 ];
 		possible priority to ensure the interrupt handler can return directly to
 		it no matter which task was running when the interrupt occurred. */
 		xTaskCreate( 	prvEMACDeferredInterruptHandlerTask,		/* The function that implements the task. */
-						( const signed char * const ) "MACTsk",
+						"MACTsk",
 						configMINIMAL_STACK_SIZE,	/* Stack allocated to the task (defined in words, not bytes). */
 						NULL, 						/* The task parameter is not used. */
 						configMAX_PRIORITIES - 1, 	/* The priority assigned to the task. */
@@ -144,9 +141,9 @@ extern uint8_t ucMACAddress[ 6 ];
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xNetworkInterfaceOutput( xNetworkBufferDescriptor_t * const pxNetworkBuffer )
+BaseType_t xNetworkInterfaceOutput( xNetworkBufferDescriptor_t * const pxNetworkBuffer )
 {
-portBASE_TYPE xReturn = pdFAIL;
+BaseType_t xReturn = pdFAIL;
 int32_t x;
 
 	/* Attempt to obtain access to a Tx descriptor. */
@@ -239,7 +236,7 @@ xIPStackEvent_t xRxEvent = { eEthernetRxEvent, NULL };
 		{
 			/* The buffer filled by the DMA is going to be passed into the IP
 			stack.  Allocate another buffer for the DMA descriptor. */
-			pxNetworkBuffer = pxNetworkBufferGet( ipTOTAL_ETHERNET_FRAME_SIZE, ( portTickType ) 0 );
+			pxNetworkBuffer = pxNetworkBufferGet( ipTOTAL_ETHERNET_FRAME_SIZE, ( TickType_t ) 0 );
 
 			if( pxNetworkBuffer != NULL )
 			{
@@ -276,7 +273,7 @@ xIPStackEvent_t xRxEvent = { eEthernetRxEvent, NULL };
 					/* Data was received and stored.  Send it to the IP task
 					for processing. */
 					xRxEvent.pvData = ( void * ) pxNetworkBuffer;
-					if( xQueueSendToBack( xNetworkEventQueue, &xRxEvent, ( portTickType ) 0 ) == pdFALSE )
+					if( xQueueSendToBack( xNetworkEventQueue, &xRxEvent, ( TickType_t ) 0 ) == pdFALSE )
 					{
 						/* The buffer could not be sent to the IP task so the
 						buffer must be released. */

@@ -1,75 +1,70 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
-    FEATURES AND PORTS ARE ADDED TO FREERTOS ALL THE TIME.  PLEASE VISIT
-    http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS tutorial books are available in pdf and paperback.        *
-     *    Complete, revised, and edited pdf reference manuals are also       *
-     *    available.                                                         *
-     *                                                                       *
-     *    Purchasing FreeRTOS documentation will not only help you, by       *
-     *    ensuring you get running as quickly as possible and with an        *
-     *    in-depth knowledge of how to use FreeRTOS, it will also help       *
-     *    the FreeRTOS project to continue with its mission of providing     *
-     *    professional grade, cross platform, de facto standard solutions    *
-     *    for microcontrollers - completely free of charge!                  *
-     *                                                                       *
-     *    >>> See http://www.FreeRTOS.org/Documentation for details. <<<     *
-     *                                                                       *
-     *    Thank you for using FreeRTOS, and thank you for your support!      *
-     *                                                                       *
-    ***************************************************************************
-
+    VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
 
     This file is part of the FreeRTOS distribution.
 
     FreeRTOS is free software; you can redistribute it and/or modify it under
     the terms of the GNU General Public License (version 2) as published by the
-    Free Software Foundation AND MODIFIED BY the FreeRTOS exception.
+    Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>>>>>NOTE<<<<<< The modification to the GPL is included to allow you to
-    distribute a combined work that includes FreeRTOS without being obliged to
-    provide the source code for proprietary components outside of the FreeRTOS
-    kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-    details. You should have received a copy of the GNU General Public License
-    and the FreeRTOS license exception along with FreeRTOS; if not itcan be
-    viewed here: http://www.freertos.org/a00114.html and also obtained by
-    writing to Real Time Engineers Ltd., contact details for whom are available
-    on the FreeRTOS WEB site.
-
-    1 tab == 4 spaces!
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
+    link: http://www.freertos.org/a00114.html
 
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
-    including FreeRTOS+Trace - an indispensable productivity tool, and our new
-    fully thread aware and reentrant UDP/IP stack.
+    including FreeRTOS+Trace - an indispensable productivity tool, a DOS
+    compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems, who sell the code with commercial support,
-    indemnification and middleware, under the OpenRTOS brand.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
     mission critical applications that require provable dependability.
+
+    1 tab == 4 spaces!
 */
 
  /******************************************************************************
@@ -100,22 +95,22 @@
 /*
  * Implements the run-time-stats command.
  */
-static portBASE_TYPE prvTaskStatsCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
+static portBASE_TYPE prvTaskStatsCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Implements the task-stats command.
  */
-static portBASE_TYPE prvRunTimeStatsCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
+static portBASE_TYPE prvRunTimeStatsCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Implements the echo-three-parameters command.
  */
-static portBASE_TYPE prvThreeParameterEchoCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
+static portBASE_TYPE prvThreeParameterEchoCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Implements the echo-parameters command.
  */
-static portBASE_TYPE prvParameterEchoCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
+static portBASE_TYPE prvParameterEchoCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Registers the CLI commands defined within this file with the FreeRTOS+CLI
@@ -127,7 +122,7 @@ void vRegisterSampleCLICommands( void );
  * Implements the "trace start" and "trace stop" commands;
  */
 #if configINCLUDE_TRACE_RELATED_CLI_COMMANDS == 1
-	static portBASE_TYPE prvStartStopTraceCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
+	static portBASE_TYPE prvStartStopTraceCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 #endif
 
 /* Structure that defines the "run-time-stats" command line command.   This
@@ -202,9 +197,9 @@ void vRegisterSampleCLICommands( void )
 }
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE prvTaskStatsCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
+static portBASE_TYPE prvTaskStatsCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
-const int8_t *const pcHeader = ( int8_t * ) "Task          State  Priority  Stack	#\r\n************************************************\r\n";
+const char *const pcHeader = "Task          State  Priority  Stack	#\r\n************************************************\r\n";
 
 	/* Remove compile time warnings about unused parameters, and check the
 	write buffer is not NULL.  NOTE - for simplicity, this example assumes the
@@ -214,8 +209,8 @@ const int8_t *const pcHeader = ( int8_t * ) "Task          State  Priority  Stac
 	configASSERT( pcWriteBuffer );
 
 	/* Generate a table of task stats. */
-	strcpy( ( char * ) pcWriteBuffer, ( char * ) pcHeader );
-	vTaskList( pcWriteBuffer + strlen( ( char * ) pcHeader ) );
+	strcpy( pcWriteBuffer, pcHeader );
+	vTaskList( pcWriteBuffer + strlen( pcHeader ) );
 
 	/* There is no more data to return after this single string, so return
 	pdFALSE. */
@@ -223,9 +218,9 @@ const int8_t *const pcHeader = ( int8_t * ) "Task          State  Priority  Stac
 }
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE prvRunTimeStatsCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
+static portBASE_TYPE prvRunTimeStatsCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
-const int8_t * const pcHeader = ( int8_t * ) "Task            Abs Time      % Time\r\n****************************************\r\n";
+const char * const pcHeader = "Task            Abs Time      % Time\r\n****************************************\r\n";
 
 	/* Remove compile time warnings about unused parameters, and check the
 	write buffer is not NULL.  NOTE - for simplicity, this example assumes the
@@ -235,8 +230,8 @@ const int8_t * const pcHeader = ( int8_t * ) "Task            Abs Time      % Ti
 	configASSERT( pcWriteBuffer );
 
 	/* Generate a table of task stats. */
-	strcpy( ( char * ) pcWriteBuffer, ( char * ) pcHeader );
-	vTaskGetRunTimeStats( pcWriteBuffer + strlen( ( char * ) pcHeader ) );
+	strcpy( pcWriteBuffer, pcHeader );
+	vTaskGetRunTimeStats( pcWriteBuffer + strlen( pcHeader ) );
 
 	/* There is no more data to return after this single string, so return
 	pdFALSE. */
@@ -244,9 +239,9 @@ const int8_t * const pcHeader = ( int8_t * ) "Task            Abs Time      % Ti
 }
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE prvThreeParameterEchoCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
+static portBASE_TYPE prvThreeParameterEchoCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
-int8_t *pcParameter;
+const char *pcParameter;
 portBASE_TYPE xParameterStringLength, xReturn;
 static portBASE_TYPE lParameterNumber = 0;
 
@@ -261,7 +256,7 @@ static portBASE_TYPE lParameterNumber = 0;
 	{
 		/* The first time the function is called after the command has been
 		entered just a header string is returned. */
-		sprintf( ( char * ) pcWriteBuffer, "The three parameters were:\r\n" );
+		sprintf( pcWriteBuffer, "The three parameters were:\r\n" );
 
 		/* Next time the function is called the first parameter will be echoed
 		back. */
@@ -274,21 +269,21 @@ static portBASE_TYPE lParameterNumber = 0;
 	else
 	{
 		/* Obtain the parameter string. */
-		pcParameter = ( int8_t * ) FreeRTOS_CLIGetParameter
-									(
-										pcCommandString,		/* The command string itself. */
-										lParameterNumber,		/* Return the next parameter. */
-										&xParameterStringLength	/* Store the parameter string length. */
-									);
+		pcParameter = FreeRTOS_CLIGetParameter
+							(
+								pcCommandString,		/* The command string itself. */
+								lParameterNumber,		/* Return the next parameter. */
+								&xParameterStringLength	/* Store the parameter string length. */
+							);
 
 		/* Sanity check something was returned. */
 		configASSERT( pcParameter );
 
 		/* Return the parameter string. */
 		memset( pcWriteBuffer, 0x00, xWriteBufferLen );
-		sprintf( ( char * ) pcWriteBuffer, "%d: ", ( int ) lParameterNumber );
-		strncat( ( char * ) pcWriteBuffer, ( const char * ) pcParameter, xParameterStringLength );
-		strncat( ( char * ) pcWriteBuffer, "\r\n", strlen( "\r\n" ) );
+		sprintf( pcWriteBuffer, "%d: ", ( int ) lParameterNumber );
+		strncat( pcWriteBuffer, pcParameter, xParameterStringLength );
+		strncat( pcWriteBuffer, "\r\n", strlen( "\r\n" ) );
 
 		/* If this is the last of the three parameters then there are no more
 		strings to return after this one. */
@@ -311,9 +306,9 @@ static portBASE_TYPE lParameterNumber = 0;
 }
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE prvParameterEchoCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
+static portBASE_TYPE prvParameterEchoCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
-int8_t *pcParameter;
+const char *pcParameter;
 portBASE_TYPE xParameterStringLength, xReturn;
 static portBASE_TYPE lParameterNumber = 0;
 
@@ -328,7 +323,7 @@ static portBASE_TYPE lParameterNumber = 0;
 	{
 		/* The first time the function is called after the command has been
 		entered just a header string is returned. */
-		sprintf( ( char * ) pcWriteBuffer, "The parameters were:\r\n" );
+		sprintf( pcWriteBuffer, "The parameters were:\r\n" );
 
 		/* Next time the function is called the first parameter will be echoed
 		back. */
@@ -341,20 +336,20 @@ static portBASE_TYPE lParameterNumber = 0;
 	else
 	{
 		/* Obtain the parameter string. */
-		pcParameter = ( int8_t * ) FreeRTOS_CLIGetParameter
-									(
-										pcCommandString,		/* The command string itself. */
-										lParameterNumber,		/* Return the next parameter. */
-										&xParameterStringLength	/* Store the parameter string length. */
-									);
+		pcParameter = FreeRTOS_CLIGetParameter
+							(
+								pcCommandString,		/* The command string itself. */
+								lParameterNumber,		/* Return the next parameter. */
+								&xParameterStringLength	/* Store the parameter string length. */
+							);
 
 		if( pcParameter != NULL )
 		{
 			/* Return the parameter string. */
 			memset( pcWriteBuffer, 0x00, xWriteBufferLen );
-			sprintf( ( char * ) pcWriteBuffer, "%d: ", ( int ) lParameterNumber );
-			strncat( ( char * ) pcWriteBuffer, ( const char * ) pcParameter, xParameterStringLength );
-			strncat( ( char * ) pcWriteBuffer, "\r\n", strlen( "\r\n" ) );
+			sprintf( pcWriteBuffer, "%d: ", ( int ) lParameterNumber );
+			strncat( pcWriteBuffer, pcParameter, xParameterStringLength );
+			strncat( pcWriteBuffer, "\r\n", strlen( "\r\n" ) );
 
 			/* There might be more parameters to return after this one. */
 			xReturn = pdTRUE;
@@ -380,9 +375,9 @@ static portBASE_TYPE lParameterNumber = 0;
 
 #if configINCLUDE_TRACE_RELATED_CLI_COMMANDS == 1
 
-	static portBASE_TYPE prvStartStopTraceCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
+	static portBASE_TYPE prvStartStopTraceCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 	{
-	int8_t *pcParameter;
+	char *pcParameter;
 	portBASE_TYPE lParameterStringLength;
 
 		/* Remove compile time warnings about unused parameters, and check the
@@ -393,35 +388,35 @@ static portBASE_TYPE lParameterNumber = 0;
 		configASSERT( pcWriteBuffer );
 
 		/* Obtain the parameter string. */
-		pcParameter = ( int8_t * ) FreeRTOS_CLIGetParameter
-									(
-										pcCommandString,		/* The command string itself. */
-										1,						/* Return the first parameter. */
-										&lParameterStringLength	/* Store the parameter string length. */
-									);
+		pcParameter = FreeRTOS_CLIGetParameter
+							(
+								pcCommandString,		/* The command string itself. */
+								1,						/* Return the first parameter. */
+								&lParameterStringLength	/* Store the parameter string length. */
+							);
 
 		/* Sanity check something was returned. */
 		configASSERT( pcParameter );
 
 		/* There are only two valid parameter values. */
-		if( strncmp( ( const char * ) pcParameter, "start", strlen( "start" ) ) == 0 )
+		if( strncmp( pcParameter, "start", strlen( "start" ) ) == 0 )
 		{
 			/* Start or restart the trace. */
 			vTraceStop();
 			vTraceClear();
 			vTraceStart();
 
-			sprintf( ( char * ) pcWriteBuffer, "Trace recording (re)started.\r\n" );
+			sprintf( pcWriteBuffer, "Trace recording (re)started.\r\n" );
 		}
-		else if( strncmp( ( const char * ) pcParameter, "stop", strlen( "stop" ) ) == 0 )
+		else if( strncmp( pcParameter, "stop", strlen( "stop" ) ) == 0 )
 		{
 			/* End the trace, if one is running. */
 			vTraceStop();
-			sprintf( ( char * ) pcWriteBuffer, "Stopping trace recording.\r\n" );
+			sprintf( pcWriteBuffer, "Stopping trace recording.\r\n" );
 		}
 		else
 		{
-			sprintf( ( char * ) pcWriteBuffer, "Valid parameters are 'start' and 'stop'.\r\n" );
+			sprintf( pcWriteBuffer, "Valid parameters are 'start' and 'stop'.\r\n" );
 		}
 
 		/* There is no more data to return after this single string, so return

@@ -1,54 +1,70 @@
 /*
-    FreeRTOS V7.1.0 - Copyright (C) 2011 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS tutorial books are available in pdf and paperback.        *
-     *    Complete, revised, and edited pdf reference manuals are also       *
-     *    available.                                                         *
-     *                                                                       *
-     *    Purchasing FreeRTOS documentation will not only help you, by       *
-     *    ensuring you get running as quickly as possible and with an        *
-     *    in-depth knowledge of how to use FreeRTOS, it will also help       *
-     *    the FreeRTOS project to continue with its mission of providing     *
-     *    professional grade, cross platform, de facto standard solutions    *
-     *    for microcontrollers - completely free of charge!                  *
-     *                                                                       *
-     *    >>> See http://www.FreeRTOS.org/Documentation for details. <<<     *
-     *                                                                       *
-     *    Thank you for using FreeRTOS, and thank you for your support!      *
-     *                                                                       *
-    ***************************************************************************
-
+    VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
 
     This file is part of the FreeRTOS distribution.
 
     FreeRTOS is free software; you can redistribute it and/or modify it under
     the terms of the GNU General Public License (version 2) as published by the
-    Free Software Foundation AND MODIFIED BY the FreeRTOS exception.
-    >>>NOTE<<< The modification to the GPL is included to allow you to
-    distribute a combined work that includes FreeRTOS without being obliged to
-    provide the source code for proprietary components outside of the FreeRTOS
-    kernel.  FreeRTOS is distributed in the hope that it will be useful, but
-    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-    more details. You should have received a copy of the GNU General Public
-    License and the FreeRTOS license exception along with FreeRTOS; if not it
-    can be viewed here: http://www.freertos.org/a00114.html and also obtained
-    by writing to Richard Barry, contact details for whom are available on the
-    FreeRTOS WEB site.
+    Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
+
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
+
+    FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
+    link: http://www.freertos.org/a00114.html
+
+    ***************************************************************************
+     *                                                                       *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
+     *                                                                       *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
+     *                                                                       *
+    ***************************************************************************
+
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
+
+    http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
+    including FreeRTOS+Trace - an indispensable productivity tool, a DOS
+    compatible FAT file system, and our tiny thread aware UDP/IP stack.
+
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
+
+    http://www.SafeRTOS.com - High Integrity Systems also provide a safety
+    engineered and independently SIL3 certified version for use in safety and
+    mission critical applications that require provable dependability.
 
     1 tab == 4 spaces!
-
-    http://www.FreeRTOS.org - Documentation, latest information, license and
-    contact details.
-
-    http://www.SafeRTOS.com - A version that is certified for use in safety
-    critical systems.
-
-    http://www.OpenRTOS.com - Commercial support, development, porting,
-    licensing and training services.
 */
 
 /*
@@ -91,7 +107,7 @@ static void prvCDCCommandConsoleTask( void *pvParameters );
  * Obtain a character from the CDC input.  The calling task will be held in the
  * Blocked state (so other tasks can execute) until a character is avilable.
  */
-int8_t cGetCDCChar( void );
+char cGetCDCChar( void );
 
 /*
  * Initialise the third party virtual comport files driver
@@ -109,13 +125,13 @@ task. */
 static xSemaphoreHandle xCDCMutex = NULL;
 
 /* Const messages output by the command console. */
-static const uint8_t * const pcWelcomeMessage = ( uint8_t * ) "FreeRTOS command server.\r\nType Help to view a list of registered commands.\r\n\r\n>";
-static const uint8_t * const pcEndOfOutputMessage = ( uint8_t * ) "\r\n[Press ENTER to execute the previous command again]\r\n>";
-static const uint8_t * const pcNewLine = ( uint8_t * ) "\r\n";
+static const char * const pcWelcomeMessage = "FreeRTOS command server.\r\nType Help to view a list of registered commands.\r\n\r\n>";
+static const char * const pcEndOfOutputMessage = "\r\n[Press ENTER to execute the previous command again]\r\n>";
+static const char * const pcNewLine = "\r\n";
 
 /*-----------------------------------------------------------*/
 
-void vCDCCommandConsoleStart( uint16_t usStackSize, unsigned portBASE_TYPE uxPriority )
+void vCDCCommandConsoleStart( uint16_t usStackSize, UBaseType_t uxPriority )
 {
 	/* Create the semaphores and mutexes used by the CDC to task interface. */
 	xCDCMutex = xSemaphoreCreateMutex();
@@ -125,24 +141,26 @@ void vCDCCommandConsoleStart( uint16_t usStackSize, unsigned portBASE_TYPE uxPri
 
 	/* Add the semaphore and mutex to the queue registry for viewing in the
 	kernel aware state viewer. */
-	vQueueAddToRegistry( xCDCMutex, ( signed char * ) "CDCMu" );
-	vQueueAddToRegistry( xNewDataSemaphore, ( signed char * ) "CDCDat" );
+	vQueueAddToRegistry( xCDCMutex, "CDCMu" );
+	vQueueAddToRegistry( xNewDataSemaphore, "CDCDat" );
 
 	/* Create that task that handles the console itself. */
-	xTaskCreate( 	prvCDCCommandConsoleTask,			/* The task that implements the command console. */
-					( const int8_t * const ) "CDCCmd",	/* Text name assigned to the task.  This is just to assist debugging.  The kernel does not use this name itself. */
-					usStackSize,						/* The size of the stack allocated to the task. */
-					NULL,								/* The parameter is not used, so NULL is passed. */
-					uxPriority,							/* The priority allocated to the task. */
-					NULL );								/* A handle is not required, so just pass NULL. */
+	xTaskCreate( 	prvCDCCommandConsoleTask,	/* The task that implements the command console. */
+					"CDCCmd",					/* Text name assigned to the task.  This is just to assist debugging.  The kernel does not use this name itself. */
+					usStackSize,				/* The size of the stack allocated to the task. */
+					NULL,						/* The parameter is not used, so NULL is passed. */
+					uxPriority,					/* The priority allocated to the task. */
+					NULL );						/* A handle is not required, so just pass NULL. */
 }
 /*-----------------------------------------------------------*/
 
 static void prvCDCCommandConsoleTask( void *pvParameters )
 {
-int8_t cRxedChar, cInputIndex = 0, *pcOutputString;
-static int8_t cInputString[ cmdMAX_INPUT_SIZE ], cLastInputString[ cmdMAX_INPUT_SIZE ];
-portBASE_TYPE xReturned;
+char cRxedChar;
+uint8_t ucInputIndex = 0;
+char *pcOutputString;
+static char cInputString[ cmdMAX_INPUT_SIZE ], cLastInputString[ cmdMAX_INPUT_SIZE ];
+BaseType_t xReturned;
 
 	( void ) pvParameters;
 
@@ -156,7 +174,7 @@ portBASE_TYPE xReturned;
 
 	/* Send the welcome message.  This probably won't be seen as the console
 	will not have been connected yet. */
-	USB_WriteEP( CDC_DEP_IN, ( uint8_t * ) pcWelcomeMessage, strlen( ( const char * ) pcWelcomeMessage ) );
+	USB_WriteEP( CDC_DEP_IN, ( uint8_t * ) pcWelcomeMessage, strlen( pcWelcomeMessage ) );
 
 	for( ;; )
 	{
@@ -175,14 +193,14 @@ portBASE_TYPE xReturned;
 			if( cRxedChar == '\n' || cRxedChar == '\r' )
 			{
 				/* Just to space the output from the input. */
-				USB_WriteEP( CDC_DEP_IN, ( uint8_t * ) pcNewLine, strlen( ( const char * ) pcNewLine ) );
+				USB_WriteEP( CDC_DEP_IN, ( uint8_t * ) pcNewLine, strlen( pcNewLine ) );
 
 				/* See if the command is empty, indicating that the last command is
 				to be executed again. */
-				if( cInputIndex == 0 )
+				if( ucInputIndex == 0 )
 				{
 					/* Copy the last command back into the input string. */
-					strcpy( ( char * ) cInputString, ( char * ) cLastInputString );
+					strcpy( cInputString, cLastInputString );
 				}
 
 				/* Pass the received command to the command interpreter.  The
@@ -195,7 +213,7 @@ portBASE_TYPE xReturned;
 					xReturned = FreeRTOS_CLIProcessCommand( cInputString, pcOutputString, configCOMMAND_INT_MAX_OUTPUT_SIZE );
 
 					/* Write the generated string to the CDC. */
-					USB_WriteEP( CDC_DEP_IN, ( uint8_t * ) pcOutputString, strlen( ( const char * ) pcOutputString ) );
+					USB_WriteEP( CDC_DEP_IN, ( uint8_t * ) pcOutputString, strlen( pcOutputString ) );
 					vTaskDelay( 1 );
 
 				} while( xReturned != pdFALSE );
@@ -204,11 +222,11 @@ portBASE_TYPE xReturned;
 				Clear the input	string ready to receive the next command.  Remember
 				the command that was just processed first in case it is to be
 				processed again. */
-				strcpy( ( char * ) cLastInputString, ( char * ) cInputString );
-				cInputIndex = 0;
+				strcpy( cLastInputString, cInputString );
+				ucInputIndex = 0;
 				memset( cInputString, 0x00, cmdMAX_INPUT_SIZE );
 
-				USB_WriteEP( CDC_DEP_IN, ( uint8_t * ) pcEndOfOutputMessage, strlen( ( const char * ) pcEndOfOutputMessage ) );
+				USB_WriteEP( CDC_DEP_IN, ( uint8_t * ) pcEndOfOutputMessage, strlen( pcEndOfOutputMessage ) );
 			}
 			else
 			{
@@ -220,10 +238,10 @@ portBASE_TYPE xReturned;
 				{
 					/* Backspace was pressed.  Erase the last character in the
 					string - if any. */
-					if( cInputIndex > 0 )
+					if( ucInputIndex > 0 )
 					{
-						cInputIndex--;
-						cInputString[ cInputIndex ] = '\0';
+						ucInputIndex--;
+						cInputString[ ucInputIndex ] = '\0';
 					}
 				}
 				else
@@ -233,10 +251,10 @@ portBASE_TYPE xReturned;
 					string will be passed to the command interpreter. */
 					if( ( cRxedChar >= ' ' ) && ( cRxedChar <= '~' ) )
 					{
-						if( cInputIndex < cmdMAX_INPUT_SIZE )
+						if( ucInputIndex < cmdMAX_INPUT_SIZE )
 						{
-							cInputString[ cInputIndex ] = cRxedChar;
-							cInputIndex++;
+							cInputString[ ucInputIndex ] = cRxedChar;
+							ucInputIndex++;
 						}
 					}
 				}
@@ -249,20 +267,20 @@ portBASE_TYPE xReturned;
 }
 /*-----------------------------------------------------------*/
 
-void vOutputString( const uint8_t * const pucMessage )
+void vOutputString( const char * const pcMessage )
 {
 	if( xSemaphoreTake( xCDCMutex, cmdMAX_MUTEX_WAIT ) == pdPASS )
 	{
-		USB_WriteEP( CDC_DEP_IN, ( uint8_t * ) pucMessage, strlen( ( const char * ) pucMessage ) );
+		USB_WriteEP( CDC_DEP_IN, ( uint8_t * ) pcMessage, strlen( pcMessage ) );
 		xSemaphoreGive( xCDCMutex );
 	}
 }
 /*-----------------------------------------------------------*/
 
-int8_t cGetCDCChar( void )
+char cGetCDCChar( void )
 {
 int32_t lAvailableBytes, xBytes = 0;
-int8_t cInputChar;
+char cInputChar;
 
 	do
 	{
@@ -274,7 +292,7 @@ int8_t cInputChar;
 			{
 				/* Attempt to read one character. */
 				xBytes = 1;
-				xBytes = CDC_RdOutBuf( ( char * ) &cInputChar, &xBytes );
+				xBytes = CDC_RdOutBuf( &cInputChar, &xBytes );
 
 				xSemaphoreGive( xCDCMutex );
 			}
@@ -296,7 +314,7 @@ int8_t cInputChar;
 /* Callback function executed by the USB interrupt when new data arrives. */
 void vCDCNewDataNotify( void )
 {
-portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
 	configASSERT( xNewDataSemaphore );
 

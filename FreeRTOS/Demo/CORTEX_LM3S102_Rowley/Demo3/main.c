@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -130,10 +135,10 @@ static volatile portBASE_TYPE uxDelay = 250;
 
 /* The queue used to communicate between the I2C interrupt and the I2C 
 co-routine. */
-static xQueueHandle xADCQueue;
+static QueueHandle_t xADCQueue;
 
 /* The queue used to synchronise the flash co-routines. */
-static xQueueHandle xDelayQueue;
+static QueueHandle_t xDelayQueue;
 
 /*
  * Sets up the PLL, I2C and GPIO used by the demo.
@@ -141,8 +146,8 @@ static xQueueHandle xDelayQueue;
 static void prvSetupHardware( void );
 
 /* The co-routines as described at the top of the file. */
-static void vI2CCoRoutine( xCoRoutineHandle xHandle, unsigned portBASE_TYPE uxIndex );
-static void vFlashCoRoutine( xCoRoutineHandle xHandle, unsigned portBASE_TYPE uxIndex );
+static void vI2CCoRoutine( CoRoutineHandle_t xHandle, unsigned portBASE_TYPE uxIndex );
+static void vFlashCoRoutine( CoRoutineHandle_t xHandle, unsigned portBASE_TYPE uxIndex );
 
 /*-----------------------------------------------------------*/
 
@@ -155,7 +160,7 @@ unsigned portBASE_TYPE uxCoRoutine;
 
 	/* Create the queue used to communicate between the ISR and I2C co-routine.
 	This can only ever contain one value. */
-	xADCQueue = xQueueCreate( mainQUEUE_LENGTH, sizeof( portTickType ) );
+	xADCQueue = xQueueCreate( mainQUEUE_LENGTH, sizeof( TickType_t ) );
 
 	/* Create the queue used to synchronise the flash co-routines.  The queue
 	is used to trigger three tasks, but is for synchronisation only and does
@@ -204,9 +209,9 @@ static void prvSetupHardware( void )
 }
 /*-----------------------------------------------------------*/
 
-static void vI2CCoRoutine( xCoRoutineHandle xHandle, unsigned portBASE_TYPE uxIndex )
+static void vI2CCoRoutine( CoRoutineHandle_t xHandle, unsigned portBASE_TYPE uxIndex )
 {
-portTickType xADCResult;
+TickType_t xADCResult;
 static portBASE_TYPE xResult = 0, xMilliSecs, xLED;
 
 	crSTART( xHandle );
@@ -224,7 +229,7 @@ static portBASE_TYPE xResult = 0, xMilliSecs, xLED;
 		/* Scale the result to give a useful range of values for a visual 
 		demo. */
 		xADCResult >>= 2;
-		xMilliSecs = xADCResult / portTICK_RATE_MS;
+		xMilliSecs = xADCResult / portTICK_PERIOD_MS;
 
 		/* The delay is split between the four co-routines so they remain in
 		synch. */
@@ -246,7 +251,7 @@ static portBASE_TYPE xResult = 0, xMilliSecs, xLED;
 }
 /*-----------------------------------------------------------*/
 
-static void vFlashCoRoutine( xCoRoutineHandle xHandle, unsigned portBASE_TYPE uxIndex )
+static void vFlashCoRoutine( CoRoutineHandle_t xHandle, unsigned portBASE_TYPE uxIndex )
 {
 portBASE_TYPE xResult, xNothing;
 
@@ -274,7 +279,7 @@ portBASE_TYPE xResult, xNothing;
 
 void vI2C_ISR(void)
 {
-static portTickType xReading;
+static TickType_t xReading;
 
 	/* Clear the interrupt. */
 	I2CMasterIntClear( I2C_MASTER_BASE );

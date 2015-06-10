@@ -9236,7 +9236,7 @@ typedef struct {
 #define   US_LIN_IER_ITER_0         (0x0u << 10) /**< \brief (US_LIN_IER) No Effect */
 #define   US_LIN_IER_ITER_1         (0x1u << 10) /**< \brief (US_LIN_IER) Enables the interrupt */
 #define US_LIN_IER_TXBUFE           (0x1u << 11) /**< \brief (US_LIN_IER) Buffer Empty Interrupt Enable */
-#define   US_LIN_IER_TXBUFES_f (US_f (US_f (US_f (US_f (US_f (US_LIN_IER) No Effect */
+#define   US_LIN_IER_TXBUFE_0       (0x0u << 11) /**< \brief (US_LIN_IER) No Effect */
 #define   US_LIN_IER_TXBUFE_1       (0x1u << 11) /**< \brief (US_LIN_IER) Enables the interrupt */
 #define US_LIN_IER_RXBUFF           (0x1u << 12) /**< \brief (US_LIN_IER) Buffer Full Interrupt Enable */
 #define   US_LIN_IER_RXBUFF_0       (0x0u << 12) /**< \brief (US_LIN_IER) No Effect */
@@ -9264,11 +9264,11 @@ typedef struct {
 #define US_LIN_IER_LINCE            (0x1u << 28) /**< \brief (US_LIN_IER) LIN Checksum Error Interrupt Enable */
 #define US_LIN_IER_LINSNRE          (0x1u << 29) /**< \brief (US_LIN_IER) LIN Slave Not Responding Error Interrupt Enable */
 #define US_LIN_IER_LINSTE           (0x1u << 30) /**< \brief (US_LIN_IER) LIN Synch Tolerance Error Interrupt Enable */
-#define   US_LIN_IER_LINSTES_f (US_f (USu << 30) /**< \brief (US_LIN_IER) No Effect */
-#define   US_LIN_IER_LINSTES1       (0x1u << 30) /**< \brief (US_LIN_IER) Enables the interrupt */
+#define   US_LIN_IER_LINSTE_0       (0x0u << 30) /**< \brief (US_LIN_IER) No Effect */
+#define   US_LIN_IER_LINSTE_1       (0x1u << 30) /**< \brief (US_LIN_IER) Enables the interrupt */
 #define US_LIN_IER_LINHTE           (0x1u << 31) /**< \brief (US_LIN_IER) LIN Header Timeout Error Interrupt Enable */
-#define   US_LIN_IER_LINHTES_f (US_f (USu << 31) /**< \brief (US_LIN_IER) No Effect */
-#define   US_LIN_IER_LINHTES1       (0x1u << 31) /**< \brief (US_LIN_IER) Enables the interrupt */
+#define   US_LIN_IER_LINHTE_0       (0x0u << 31) /**< \brief (US_LIN_IER) No Effect */
+#define   US_LIN_IER_LINHTE_1       (0x1u << 31) /**< \brief (US_LIN_IER) Enables the interrupt */
 /* -------- US_SPI_SLAVE_IER : (USART Offset: 0x08) Interrupt Enable Register -------- */
 #define US_SPI_SLAVE_IER_RXRDY      (0x1u <<  0) /**< \brief (US_SPI_SLAVE_IER) Receiver Ready Interrupt Enable */
 #define   US_SPI_SLAVE_IER_RXRDY_0  (0x0u <<  0) /**< \brief (US_SPI_SLAVE_IER) No Effect */
@@ -9359,7 +9359,7 @@ typedef struct {
 #define   US_USART_IER_ITER_0       (0x0u << 10) /**< \brief (US_USART_IER) No Effect */
 #define   US_USART_IER_ITER_1       (0x1u << 10) /**< \brief (US_USART_IER) Enables the interrupt */
 #define US_USART_IER_TXBUFE         (0x1u << 11) /**< \brief (US_USART_IER) Buffer Empty Interrupt Enable */
-#define   US_USART_IER_TXBUFE_0(US_f (US_f (US_f (US_f (US_f (US_USART_IER) No Effect */
+#define   US_USART_IER_TXBUFE_0     (0x0u << 11) /**< \brief (US_USART_IER) No Effect */
 #define   US_USART_IER_TXBUFE_1     (0x1u << 11) /**< \brief (US_USART_IER) Enables the interrupt */
 #define US_USART_IER_RXBUFF         (0x1u << 12) /**< \brief (US_USART_IER) Buffer Full Interrupt Enable */
 #define   US_USART_IER_RXBUFF_0     (0x0u << 12) /**< \brief (US_USART_IER) No Effect */
@@ -9450,7 +9450,7 @@ typedef struct {
 #define   US_LIN_IDR_ITER_0         (0x0u << 10) /**< \brief (US_LIN_IDR) No Effect */
 #define   US_LIN_IDR_ITER_1         (0x1u << 10) /**< \brief (US_LIN_IDR) Disables the interrupt */
 #define US_LIN_IDR_TXBUFE           (0x1u << 11) /**< \brief (US_LIN_IDR) Buffer Empty Interrupt Disable */
-#define   US_LIN_IDR_TXBUFES_f (US_f (US_f (US_f (US_f (US_f (US_LIN_IDR) No Effect */
+#define   US_LIN_IDR_TXBUFE_0       (0x0u << 11) /**< \brief (US_LIN_IDR) No Effect */
 #define   US_LIN_IDR_TXBUFE_1       (0x1u << 11) /**< \brief (US_LIN_IDR) Disables the interrupt */
 #define US_LIN_IDR_RXBUFF           (0x1u << 12) /**< \brief (US_LIN_IDR) Buffer Full Interrupt Disable */
 #define   US_LIN_IDR_RXBUFF_0       (0x0u << 12) /**< \brief (US_LIN_IDR) No Effect */
@@ -9478,11 +9478,11 @@ typedef struct {
 #define US_LIN_IDR_LINCE            (0x1u << 28) /**< \brief (US_LIN_IDR) LIN Checksum Error Interrupt Disable */
 #define US_LIN_IDR_LINSNRE          (0x1u << 29) /**< \brief (US_LIN_IDR) LIN Slave Not Responding Error Interrupt Disable */
 #define US_LIN_IDR_LINSTE           (0x1u << 30) /**< \brief (US_LIN_IDR) LIN Synch Tolerance Error Interrupt Disable */
-#define   US_LIN_IDR_LINSTES_f (US_f (USu << 30) /**< \brief (US_LIN_IDR) No Effect */
-#define   US_LIN_IDR_LINSTES1       (0x1u << 30) /**< \brief (US_LIN_IDR) Disables the interrupt */
+#define   US_LIN_IDR_LINSTE_0       (0x0u << 30) /**< \brief (US_LIN_IDR) No Effect */
+#define   US_LIN_IDR_LINSTE_1       (0x1u << 30) /**< \brief (US_LIN_IDR) Disables the interrupt */
 #define US_LIN_IDR_LINHTE           (0x1u << 31) /**< \brief (US_LIN_IDR) LIN Header Timeout Error Interrupt Disable */
-#define   US_LIN_IDR_LINHTES_f (US_f (USu << 31) /**< \brief (US_LIN_IDR) No Effect */
-#define   US_LIN_IDR_LINHTES1       (0x1u << 31) /**< \brief (US_LIN_IDR) Disables the interrupt */
+#define   US_LIN_IDR_LINHTE_0       (0x0u << 31) /**< \brief (US_LIN_IDR) No Effect */
+#define   US_LIN_IDR_LINHTE_1       (0x1u << 31) /**< \brief (US_LIN_IDR) Disables the interrupt */
 /* -------- US_SPI_SLAVE_IDR : (USART Offset: 0x0C) Interrupt Disable Register -------- */
 #define US_SPI_SLAVE_IDR_RXRDY      (0x1u <<  0) /**< \brief (US_SPI_SLAVE_IDR) Receiver Ready Interrupt Disable */
 #define   US_SPI_SLAVE_IDR_RXRDY_0  (0x0u <<  0) /**< \brief (US_SPI_SLAVE_IDR) No Effect */
@@ -9573,7 +9573,7 @@ typedef struct {
 #define   US_USART_IDR_ITER_0       (0x0u << 10) /**< \brief (US_USART_IDR) No Effect */
 #define   US_USART_IDR_ITER_1       (0x1u << 10) /**< \brief (US_USART_IDR) Disables the interrupt */
 #define US_USART_IDR_TXBUFE         (0x1u << 11) /**< \brief (US_USART_IDR) Buffer Empty Interrupt Disable */
-#define   US_USART_IDR_TXBUFE_0(US_f (US_f (US_f (US_f (US_f (US_USART_IDR) No Effect */
+#define   US_USART_IDR_TXBUFE_0     (0x0u << 11) /**< \brief (US_USART_IDR) No Effect */
 #define   US_USART_IDR_TXBUFE_1     (0x1u << 11) /**< \brief (US_USART_IDR) Disables the interrupt */
 #define US_USART_IDR_RXBUFF         (0x1u << 12) /**< \brief (US_USART_IDR) Buffer Full Interrupt Disable */
 #define   US_USART_IDR_RXBUFF_0     (0x0u << 12) /**< \brief (US_USART_IDR) No Effect */
@@ -9664,7 +9664,7 @@ typedef struct {
 #define   US_LIN_IMR_ITER_0         (0x0u << 10) /**< \brief (US_LIN_IMR) The interrupt is disabled */
 #define   US_LIN_IMR_ITER_1         (0x1u << 10) /**< \brief (US_LIN_IMR) The interrupt is enabled */
 #define US_LIN_IMR_TXBUFE           (0x1u << 11) /**< \brief (US_LIN_IMR) Buffer Empty Interrupt Mask */
-#define   US_LIN_IMR_TXBUFES_f (US_f (US_f (US_f (US_f (US_f (US_LIN_IMR) The interrupt is disabled */
+#define   US_LIN_IMR_TXBUFE_0       (0x0u << 11) /**< \brief (US_LIN_IMR) The interrupt is disabled */
 #define   US_LIN_IMR_TXBUFE_1       (0x1u << 11) /**< \brief (US_LIN_IMR) The interrupt is enabled */
 #define US_LIN_IMR_RXBUFF           (0x1u << 12) /**< \brief (US_LIN_IMR) Buffer Full Interrupt Mask */
 #define   US_LIN_IMR_RXBUFF_0       (0x0u << 12) /**< \brief (US_LIN_IMR) The interrupt is disabled */
@@ -9692,11 +9692,11 @@ typedef struct {
 #define US_LIN_IMR_LINCE            (0x1u << 28) /**< \brief (US_LIN_IMR) LIN Checksum Error Interrupt Mask */
 #define US_LIN_IMR_LINSNRE          (0x1u << 29) /**< \brief (US_LIN_IMR) LIN Slave Not Responding Error Interrupt Mask */
 #define US_LIN_IMR_LINSTE           (0x1u << 30) /**< \brief (US_LIN_IMR) LIN Synch Tolerance Error Interrupt Mask */
-#define   US_LIN_IMR_LINSTES_f (US_f (USu << 30) /**< \brief (US_LIN_IMR) The interrupt is disabled */
-#define   US_LIN_IMR_LINSTES1       (0x1u << 30) /**< \brief (US_LIN_IMR) The interrupt is enabled */
+#define   US_LIN_IMR_LINSTE_0       (0x0u << 30) /**< \brief (US_LIN_IMR) The interrupt is disabled */
+#define   US_LIN_IMR_LINSTE_1       (0x1u << 30) /**< \brief (US_LIN_IMR) The interrupt is enabled */
 #define US_LIN_IMR_LINHTE           (0x1u << 31) /**< \brief (US_LIN_IMR) LIN Header Timeout Error Interrupt Mask */
-#define   US_LIN_IMR_LINHTES_f (US_f (USu << 31) /**< \brief (US_LIN_IMR) The interrupt is disabled */
-#define   US_LIN_IMR_LINHTES1       (0x1u << 31) /**< \brief (US_LIN_IMR) The interrupt is enabled */
+#define   US_LIN_IMR_LINHTE_0       (0x0u << 31) /**< \brief (US_LIN_IMR) The interrupt is disabled */
+#define   US_LIN_IMR_LINHTE_1       (0x1u << 31) /**< \brief (US_LIN_IMR) The interrupt is enabled */
 /* -------- US_SPI_SLAVE_IMR : (USART Offset: 0x10) Interrupt Mask Register -------- */
 #define US_SPI_SLAVE_IMR_RXRDY      (0x1u <<  0) /**< \brief (US_SPI_SLAVE_IMR) RXRDY Interrupt Mask */
 #define   US_SPI_SLAVE_IMR_RXRDY_0  (0x0u <<  0) /**< \brief (US_SPI_SLAVE_IMR) The interrupt is disabled */
@@ -9787,7 +9787,7 @@ typedef struct {
 #define   US_USART_IMR_ITER_0       (0x0u << 10) /**< \brief (US_USART_IMR) The interrupt is disabled */
 #define   US_USART_IMR_ITER_1       (0x1u << 10) /**< \brief (US_USART_IMR) The interrupt is enabled */
 #define US_USART_IMR_TXBUFE         (0x1u << 11) /**< \brief (US_USART_IMR) Buffer Empty Interrupt Mask */
-#define   US_USART_IMR_TXBUFE_0(US_f (US_f (US_f (US_f (US_f (US_USART_IMR) The interrupt is disabled */
+#define   US_USART_IMR_TXBUFE_0     (0x0u << 11) /**< \brief (US_USART_IMR) The interrupt is disabled */
 #define   US_USART_IMR_TXBUFE_1     (0x1u << 11) /**< \brief (US_USART_IMR) The interrupt is enabled */
 #define US_USART_IMR_RXBUFF         (0x1u << 12) /**< \brief (US_USART_IMR) Buffer Full Interrupt Mask */
 #define   US_USART_IMR_RXBUFF_0     (0x0u << 12) /**< \brief (US_USART_IMR) The interrupt is disabled */
@@ -9878,7 +9878,7 @@ typedef struct {
 #define   US_LIN_CSR_ITER_0         (0x0u << 10) /**< \brief (US_LIN_CSR) Maximum number of repetitions has not been reached since the last RSIT */
 #define   US_LIN_CSR_ITER_1         (0x1u << 10) /**< \brief (US_LIN_CSR) Maximum number of repetitions has been reached since the last RSIT */
 #define US_LIN_CSR_TXBUFE           (0x1u << 11) /**< \brief (US_LIN_CSR) Transmission Buffer Empty */
-#define   US_LIN_CSR_TXBUFES_f (US_f (US_f (US_f (US_f (US_f (US_LIN_CSR) The signal Buffer Empty from the Transmit PDC channel is inactive */
+#define   US_LIN_CSR_TXBUFE_0       (0x0u << 11) /**< \brief (US_LIN_CSR) The signal Buffer Empty from the Transmit PDC channel is inactive */
 #define   US_LIN_CSR_TXBUFE_1       (0x1u << 11) /**< \brief (US_LIN_CSR) The signal Buffer Empty from the Transmit PDC channel is active */
 #define US_LIN_CSR_RXBUFF           (0x1u << 12) /**< \brief (US_LIN_CSR) Reception Buffer Full */
 #define   US_LIN_CSR_RXBUFF_0       (0x0u << 12) /**< \brief (US_LIN_CSR) The signal Buffer Full from the Receive PDC channel is inactive */
@@ -9918,11 +9918,11 @@ typedef struct {
 #define US_LIN_CSR_LINCE            (0x1u << 28) /**< \brief (US_LIN_CSR) LIN Checksum Error */
 #define US_LIN_CSR_LINSNRE          (0x1u << 29) /**< \brief (US_LIN_CSR) LIN Slave Not Responding Error */
 #define US_LIN_CSR_LINSTE           (0x1u << 30) /**< \brief (US_LIN_CSR) LIN Synch Tolerance Error */
-#define   US_LIN_CSR_LINSTES_f (US_f (USu << 30) /**< \brief (US_LIN_CSR) COMM_TX is at 0 */
-#define   US_LIN_CSR_LINSTES1       (0x1u << 30) /**< \brief (US_LIN_CSR) COMM_TX is at 1 */
+#define   US_LIN_CSR_LINSTE_0       (0x0u << 30) /**< \brief (US_LIN_CSR) COMM_TX is at 0 */
+#define   US_LIN_CSR_LINSTE_1       (0x1u << 30) /**< \brief (US_LIN_CSR) COMM_TX is at 1 */
 #define US_LIN_CSR_LINHTE           (0x1u << 31) /**< \brief (US_LIN_CSR) LIN Header Timeout Error */
-#define   US_LIN_CSR_LINHTES_f (US_f (USu << 31) /**< \brief (US_LIN_CSR) COMM_RX is at 0 */
-#define   US_LIN_CSR_LINHTES1       (0x1u << 31) /**< \brief (US_LIN_CSR) COMM_RX is at 1 */
+#define   US_LIN_CSR_LINHTE_0       (0x0u << 31) /**< \brief (US_LIN_CSR) COMM_RX is at 0 */
+#define   US_LIN_CSR_LINHTE_1       (0x1u << 31) /**< \brief (US_LIN_CSR) COMM_RX is at 1 */
 /* -------- US_SPI_SLAVE_CSR : (USART Offset: 0x14) Channel Status Register -------- */
 #define US_SPI_SLAVE_CSR_RXRDY      (0x1u <<  0) /**< \brief (US_SPI_SLAVE_CSR) Receiver Ready */
 #define   US_SPI_SLAVE_CSR_RXRDY_0  (0x0u <<  0) /**< \brief (US_SPI_SLAVE_CSR) No complete character has been received since the last read of RHR or the receiver is disabled. If characters werebeing received when the receiver was disabled, RXRDY changes to 1 when the receiver is enabled */
@@ -10025,7 +10025,7 @@ typedef struct {
 #define   US_USART_CSR_ITER_0       (0x0u << 10) /**< \brief (US_USART_CSR) Maximum number of repetitions has not been reached since the last RSIT */
 #define   US_USART_CSR_ITER_1       (0x1u << 10) /**< \brief (US_USART_CSR) Maximum number of repetitions has been reached since the last RSIT */
 #define US_USART_CSR_TXBUFE         (0x1u << 11) /**< \brief (US_USART_CSR) Transmission Buffer Empty */
-#define   US_USART_CSR_TXBUFE_0(US_f (US_f (US_f (US_f (US_f (US_USART_CSR) The signal Buffer Empty from the Transmit PDC channel is inactive */
+#define   US_USART_CSR_TXBUFE_0     (0x0u << 11) /**< \brief (US_USART_CSR) The signal Buffer Empty from the Transmit PDC channel is inactive */
 #define   US_USART_CSR_TXBUFE_1     (0x1u << 11) /**< \brief (US_USART_CSR) The signal Buffer Empty from the Transmit PDC channel is active */
 #define US_USART_CSR_RXBUFF         (0x1u << 12) /**< \brief (US_USART_CSR) Reception Buffer Full */
 #define   US_USART_CSR_RXBUFF_0     (0x0u << 12) /**< \brief (US_USART_CSR) The signal Buffer Full from the Receive PDC channel is inactive */

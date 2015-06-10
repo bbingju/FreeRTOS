@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -85,7 +90,7 @@
 /*-----------------------------------------------------------*/
 
 /* How long to wait before attempting to connect the MAC again. */
-#define uipINIT_WAIT    ( 100 / portTICK_RATE_MS )
+#define uipINIT_WAIT    ( 100 / portTICK_PERIOD_MS )
 
 /* Shortcut to the header within the Rx buffer. */
 #define xHeader ((struct uip_eth_hdr *) &uip_buf[ 0 ])
@@ -110,7 +115,7 @@ constants are assigned to the timer IDs. */
 static void prvSetMACAddress( void );
 
 /*
- * Perform any uIP initialisation necessary. 
+ * Perform any uIP initialisation necessary.
  */
 static void prvInitialise_uIP( void );
 
@@ -118,7 +123,7 @@ static void prvInitialise_uIP( void );
  * The callback function that is assigned to both the periodic timer and the
  * ARP timer.
  */
-static void prvUIPTimerCallback( xTimerHandle xTimer );
+static void prvUIPTimerCallback( TimerHandle_t xTimer );
 
 /*
  * Port functions required by the uIP stack.
@@ -128,7 +133,7 @@ clock_time_t clock_time( void );
 /*-----------------------------------------------------------*/
 
 /* The queue used to send TCP/IP events to the uIP stack. */
-xQueueHandle xEMACEventQueue = NULL;
+QueueHandle_t xEMACEventQueue = NULL;
 
 /*-----------------------------------------------------------*/
 
@@ -145,7 +150,7 @@ unsigned long ulNewEvent = 0UL;
 unsigned long ulUIP_Events = 0UL;
 
 	( void ) pvParameters;
-	
+
 	/* Initialise the uIP stack. */
 	prvInitialise_uIP();
 
@@ -160,10 +165,10 @@ unsigned long ulUIP_Events = 0UL;
 	for( ;; )
 	{
 		if( ( ulUIP_Events & uipETHERNET_RX_EVENT ) != 0UL )
-		{		
+		{
 			/* Is there received data ready to be processed? */
 			uip_len = ( unsigned short ) ulEMACRead();
-			
+
 			if( ( uip_len > 0 ) && ( uip_buf != NULL ) )
 			{
 				/* Standard uIP loop taken from the uIP manual. */
@@ -199,11 +204,11 @@ unsigned long ulUIP_Events = 0UL;
 				ulUIP_Events &= ~uipETHERNET_RX_EVENT;
 			}
 		}
-		
+
 		if( ( ulUIP_Events & uipPERIODIC_TIMER_EVENT ) != 0UL )
 		{
 			ulUIP_Events &= ~uipPERIODIC_TIMER_EVENT;
-					
+
 			for( i = 0; i < UIP_CONNS; i++ )
 			{
 				uip_periodic( i );
@@ -218,14 +223,14 @@ unsigned long ulUIP_Events = 0UL;
 				}
 			}
 		}
-		
+
 		/* Call the ARP timer function every 10 seconds. */
 		if( ( ulUIP_Events & uipARP_TIMER_EVENT ) != 0 )
 		{
 			ulUIP_Events &= ~uipARP_TIMER_EVENT;
 			uip_arp_timer();
 		}
-			
+
 		if( ulUIP_Events == pdFALSE )
 		{
 			xQueueReceive( xEMACEventQueue, &ulNewEvent, portMAX_DELAY );
@@ -237,7 +242,7 @@ unsigned long ulUIP_Events = 0UL;
 
 static void prvInitialise_uIP( void )
 {
-xTimerHandle xARPTimer, xPeriodicTimer;
+TimerHandle_t xARPTimer, xPeriodicTimer;
 uip_ipaddr_t xIPAddr;
 const unsigned long ul_uIPEventQueueLength = 10UL;
 
@@ -254,15 +259,15 @@ const unsigned long ul_uIPEventQueueLength = 10UL;
 	xEMACEventQueue = xQueueCreate( ul_uIPEventQueueLength, sizeof( unsigned long ) );
 
 	/* Create and start the uIP timers. */
-	xARPTimer = xTimerCreate( 	( const signed char * const ) "ARPTimer", /* Just a name that is helpful for debugging, not used by the kernel. */
-								( 10000UL / portTICK_RATE_MS ), /* Timer period. */
+	xARPTimer = xTimerCreate( 	"ARPTimer", /* Just a name that is helpful for debugging, not used by the kernel. */
+								( 10000UL / portTICK_PERIOD_MS ), /* Timer period. */
 								pdTRUE, /* Autor-reload. */
 								( void * ) uipARP_TIMER,
 								prvUIPTimerCallback
 							);
 
-	xPeriodicTimer = xTimerCreate( 	( const signed char * const ) "PeriodicTimer",
-									( 50 / portTICK_RATE_MS ),
+	xPeriodicTimer = xTimerCreate( 	"PeriodicTimer",
+									( 50 / portTICK_PERIOD_MS ),
 									pdTRUE, /* Autor-reload. */
 									( void * ) uipPERIODIC_TIMER,
 									prvUIPTimerCallback
@@ -276,7 +281,7 @@ const unsigned long ul_uIPEventQueueLength = 10UL;
 }
 /*-----------------------------------------------------------*/
 
-static void prvUIPTimerCallback( xTimerHandle xTimer )
+static void prvUIPTimerCallback( TimerHandle_t xTimer )
 {
 static const unsigned long ulARPTimerExpired = uipARP_TIMER_EVENT;
 static const unsigned long ulPeriodicTimerExpired = uipPERIODIC_TIMER_EVENT;
@@ -318,7 +323,7 @@ char *c;
 
 	/* Only interested in processing form input if this is the IO page. */
 	c = strstr( pcInputString, "io.shtml" );
-	
+
 	if( c )
 	{
 		/* Is there a command in the string? */

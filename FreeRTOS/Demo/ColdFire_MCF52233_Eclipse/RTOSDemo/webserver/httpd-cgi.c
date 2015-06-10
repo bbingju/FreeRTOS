@@ -62,7 +62,7 @@ HTTPD_CGI_CALL(rtos, "rtos-stats", rtos_stats );
 HTTPD_CGI_CALL(io, "led-io", led_io );
 
 
-static const struct httpd_cgi_call *calls[] = { &file, &tcp, &net, &rtos, &io, NULL };
+static const struct httpd_cgi_call * const calls[] = { &file, &tcp, &net, &rtos, &io, NULL };
 
 /*---------------------------------------------------------------------------*/
 static
@@ -206,7 +206,7 @@ PT_THREAD(net_stats(struct httpd_state *s, char *ptr))
 }
 /*---------------------------------------------------------------------------*/
 
-extern void vTaskList( signed char *pcWriteBuffer );
+extern void vTaskList( char *pcWriteBuffer );
 extern unsigned long ulGetErrorCode( void );
 
 static char cCountBuf[ 32 ];
@@ -217,7 +217,7 @@ generate_rtos_stats(void *arg)
 	( void ) arg;
 	lRefreshCount++;
 	sprintf( cCountBuf, "<p><br>Refresh count = %d, Error code = %d (0 = no errors)", (int)lRefreshCount, (int)ulGetErrorCode() );
-    vTaskList( uip_appdata );
+    vTaskList( ( char * ) uip_appdata );
 	strcat( uip_appdata, cCountBuf );
 
 	return strlen( uip_appdata );
@@ -272,7 +272,7 @@ void vApplicationProcessFormInput( char *pcInputString )
 {
 char *c = pcInputString;
 
-	/* Process the form input sent by the IO page of the served HTML. 
+	/* Process the form input sent by the IO page of the served HTML.
 	This just contains an instruction to either turn on or off the LED. */
 	while( ( *c != '?' ) && ( *c != 0x00 ) )
 	{

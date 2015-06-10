@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -77,33 +82,15 @@
 static void vRegTest1( void *pvParameters );
 static void vRegTest2( void *pvParameters );
 
-/*
- * A task that tests the management of the Interrupt Controller (IC) during a
- * context switch.  The state of the IC current mask level must be maintained
- * across context switches.  Also, yields must be able to be performed when the
- * interrupt controller mask is not zero.  This task tests both these
- * requirements.
- */
-static void prvICCheck1Task( void *pvParameters );
-
 /* Counters used to ensure the tasks are still running. */
-static volatile unsigned long ulRegTest1Counter = 0UL, ulRegTest2Counter = 0UL, ulICTestCounter = 0UL;
+static volatile unsigned long ulRegTest1Counter = 0UL, ulRegTest2Counter = 0UL;
 
-/* Handle to the task that checks the interrupt controller behaviour.  This is
-used by the traceTASK_SWITCHED_OUT() macro, which is defined in
-FreeRTOSConfig.h and can be removed - it is just for the purpose of this test. */
-xTaskHandle xICTestTask = NULL;
-
-/* Variable that gets set to pdTRUE by traceTASK_SWITCHED_OUT each time
-is switched out. */
-volatile unsigned long ulTaskSwitchedOut;
 /*-----------------------------------------------------------*/
 
 void vStartRegTestTasks( void )
 {
-	xTaskCreate( vRegTest1, ( signed char * ) "RTest1", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
-	xTaskCreate( vRegTest2, ( signed char * ) "RTest1", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
-	xTaskCreate( prvICCheck1Task, ( signed char * ) "ICCheck", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, &xICTestTask );
+	xTaskCreate( vRegTest1, "RTest1", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
+	xTaskCreate( vRegTest2, "RTest1", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
 }
 /*-----------------------------------------------------------*/
 
@@ -232,61 +219,9 @@ static void vRegTest2( void *pvParameters )
 }
 /*-----------------------------------------------------------*/
 
-static void prvICCheck1Task( void *pvParameters )
-{
-long lICCheckStatus = pdPASS;
-
-	for( ;; )
-	{
-		/* At this point the interrupt mask should be zero. */
-		if( ic->cpl != 0 )
-		{
-			lICCheckStatus = pdFAIL;
-		}
-
-		/* If we yield here, it should still be 0 when the task next runs.
-		ulTaskSwitchedOut is just used to check that a switch does actually
-		happen. */
-		ulTaskSwitchedOut = pdFALSE;
-		taskYIELD();
-		if( ( ulTaskSwitchedOut != pdTRUE ) || ( ic->cpl != 0 ) )
-		{
-			lICCheckStatus = pdFAIL;
-		}
-
-		/* Set the interrupt mask to portSYSTEM_INTERRUPT_PRIORITY_LEVEL + 1,
-		before checking it is as expected. */
-		taskENTER_CRITICAL();
-		if( ic->cpl != ( portSYSTEM_INTERRUPT_PRIORITY_LEVEL + 1 ) )
-		{
-			lICCheckStatus = pdFAIL;
-		}
-
-		/* If we yield here, it should still be
-		portSYSTEM_INTERRUPT_PRIORITY_LEVEL + 10 when the task next runs.  */
-		ulTaskSwitchedOut = pdFALSE;
-		taskYIELD();
-		if( ( ulTaskSwitchedOut != pdTRUE ) || ( ic->cpl != ( portSYSTEM_INTERRUPT_PRIORITY_LEVEL + 1 ) ) )
-		{
-			lICCheckStatus = pdFAIL;
-		}
-
-		/* Return the interrupt mask to its default state. */
-		taskEXIT_CRITICAL();
-
-		/* Just increment a loop counter so the check task knows if this task
-		is still running or not. */
-		if( lICCheckStatus == pdPASS )
-		{
-			ulICTestCounter++;
-		}
-	}
-}
-/*-----------------------------------------------------------*/
-
 portBASE_TYPE xAreRegTestTasksStillRunning( void )
 {
-static unsigned long ulLastCounter1 = 0UL, ulLastCounter2 = 0UL, ulLastICTestCounter = 0UL;
+static unsigned long ulLastCounter1 = 0UL, ulLastCounter2 = 0UL;
 long lReturn;
 
 	/* Check that both loop counters are still incrementing, indicating that
@@ -299,10 +234,6 @@ long lReturn;
 	{
 		lReturn = pdFAIL;
 	}
-	else if( ulLastICTestCounter == ulICTestCounter )
-	{
-		lReturn = pdFAIL;
-	}
 	else
 	{
 		lReturn = pdPASS;
@@ -310,21 +241,6 @@ long lReturn;
 
 	ulLastCounter1 = ulRegTest1Counter;
 	ulLastCounter2 = ulRegTest2Counter;
-	ulLastICTestCounter = ulICTestCounter;
 
 	return lReturn;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

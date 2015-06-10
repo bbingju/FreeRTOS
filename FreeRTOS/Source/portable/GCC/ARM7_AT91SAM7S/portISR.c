@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -83,19 +88,19 @@
 #include "AT91SAM7X256.h"
 
 /* Constants required to handle interrupts. */
-#define portTIMER_MATCH_ISR_BIT		( ( unsigned char ) 0x01 )
-#define portCLEAR_VIC_INTERRUPT		( ( unsigned long ) 0 )
+#define portTIMER_MATCH_ISR_BIT		( ( uint8_t ) 0x01 )
+#define portCLEAR_VIC_INTERRUPT		( ( uint32_t ) 0 )
 
 /* Constants required to handle critical sections. */
-#define portNO_CRITICAL_NESTING		( ( unsigned long ) 0 )
-volatile unsigned long ulCriticalNesting = 9999UL;
+#define portNO_CRITICAL_NESTING		( ( uint32_t ) 0 )
+volatile uint32_t ulCriticalNesting = 9999UL;
 
 /*-----------------------------------------------------------*/
 
 /* ISR to handle manual context switches (from a call to taskYIELD()). */
 void vPortYieldProcessor( void ) __attribute__((interrupt("SWI"), naked));
 
-/* 
+/*
  * The scheduler can only be started from ARM mode, hence the inclusion of this
  * function here.
  */
@@ -113,17 +118,17 @@ void vPortISRStartFirstTask( void )
 /*
  * Called by portYIELD() or taskYIELD() to manually force a context switch.
  *
- * When a context switch is performed from the task level the saved task 
+ * When a context switch is performed from the task level the saved task
  * context is made to look as if it occurred from within the tick ISR.  This
  * way the same restore context function can be used when restoring the context
  * saved from the ISR or that saved from a call to vPortYieldProcessor.
  */
 void vPortYieldProcessor( void )
 {
-	/* Within an IRQ ISR the link register has an offset from the true return 
-	address, but an SWI ISR does not.  Add the offset manually so the same 
+	/* Within an IRQ ISR the link register has an offset from the true return
+	address, but an SWI ISR does not.  Add the offset manually so the same
 	ISR return code can be used in both cases. */
-	asm volatile ( "ADD		LR, LR, #4" );
+	__asm volatile ( "ADD		LR, LR, #4" );
 
 	/* Perform the context switch.  First save the context of the current task. */
 	portSAVE_CONTEXT();
@@ -132,32 +137,32 @@ void vPortYieldProcessor( void )
 	vTaskSwitchContext();
 
 	/* Restore the context of the new task. */
-	portRESTORE_CONTEXT();	
+	portRESTORE_CONTEXT();
 }
 /*-----------------------------------------------------------*/
 
-/* 
+/*
  * The ISR used for the scheduler tick depends on whether the cooperative or
  * the preemptive scheduler is being used.
  */
 
 #if configUSE_PREEMPTION == 0
 
-	/* The cooperative scheduler requires a normal IRQ service routine to 
+	/* The cooperative scheduler requires a normal IRQ service routine to
 	simply increment the system tick. */
 	void vNonPreemptiveTick( void ) __attribute__ ((interrupt ("IRQ")));
 	void vNonPreemptiveTick( void )
-	{		
-		unsigned long ulDummy;
-		
+	{
+		uint32_t ulDummy;
+
 		/* Increment the tick count - which may wake some tasks but as the
 		preemptive scheduler is not being used any woken task is not given
 		processor time no matter what its priority. */
 		xTaskIncrementTick();
-		
+
 		/* Clear the PIT interrupt. */
 		ulDummy = AT91C_BASE_PITC->PITC_PIVR;
-		
+
 		/* End the interrupt in the AIC. */
 		AT91C_BASE_AIC->AIC_EOICR = ulDummy;
 	}
@@ -170,7 +175,7 @@ void vPortYieldProcessor( void )
 	void vPreemptiveTick( void )
 	{
 		/* Save the context of the current task. */
-		portSAVE_CONTEXT();			
+		portSAVE_CONTEXT();
 
 		/* Increment the tick count - this may wake a task. */
 		if( xTaskIncrementTick() != pdFALSE )
@@ -178,10 +183,10 @@ void vPortYieldProcessor( void )
 			/* Find the highest priority task that is ready to run. */
 			vTaskSwitchContext();
 		}
-		
+
 		/* End the interrupt in the AIC. */
-		AT91C_BASE_AIC->AIC_EOICR = AT91C_BASE_PITC->PITC_PIVR;;
-		
+		AT91C_BASE_AIC->AIC_EOICR = AT91C_BASE_PITC->PITC_PIVR;
+
 		portRESTORE_CONTEXT();
 	}
 
@@ -199,7 +204,7 @@ void vPortEnableInterruptsFromThumb( void ) __attribute__ ((naked));
 
 void vPortDisableInterruptsFromThumb( void )
 {
-	asm volatile ( 
+	__asm volatile (
 		"STMDB	SP!, {R0}		\n\t"	/* Push R0.									*/
 		"MRS	R0, CPSR		\n\t"	/* Get CPSR.								*/
 		"ORR	R0, R0, #0xC0	\n\t"	/* Disable IRQ, FIQ.						*/
@@ -207,14 +212,14 @@ void vPortDisableInterruptsFromThumb( void )
 		"LDMIA	SP!, {R0}		\n\t"	/* Pop R0.									*/
 		"BX		R14" );					/* Return back to thumb.					*/
 }
-		
+
 void vPortEnableInterruptsFromThumb( void )
 {
-	asm volatile ( 
-		"STMDB	SP!, {R0}		\n\t"	/* Push R0.									*/	
-		"MRS	R0, CPSR		\n\t"	/* Get CPSR.								*/	
-		"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.							*/	
-		"MSR	CPSR, R0		\n\t"	/* Write back modified value.				*/	
+	__asm volatile (
+		"STMDB	SP!, {R0}		\n\t"	/* Push R0.									*/
+		"MRS	R0, CPSR		\n\t"	/* Get CPSR.								*/
+		"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.							*/
+		"MSR	CPSR, R0		\n\t"	/* Write back modified value.				*/
 		"LDMIA	SP!, {R0}		\n\t"	/* Pop R0.									*/
 		"BX		R14" );					/* Return back to thumb.					*/
 }
@@ -227,14 +232,14 @@ in a variable, which is then saved as part of the stack context. */
 void vPortEnterCritical( void )
 {
 	/* Disable interrupts as per portDISABLE_INTERRUPTS(); 							*/
-	asm volatile ( 
+	__asm volatile (
 		"STMDB	SP!, {R0}			\n\t"	/* Push R0.								*/
 		"MRS	R0, CPSR			\n\t"	/* Get CPSR.							*/
 		"ORR	R0, R0, #0xC0		\n\t"	/* Disable IRQ, FIQ.					*/
 		"MSR	CPSR, R0			\n\t"	/* Write back modified value.			*/
 		"LDMIA	SP!, {R0}" );				/* Pop R0.								*/
 
-	/* Now interrupts are disabled ulCriticalNesting can be accessed 
+	/* Now interrupts are disabled ulCriticalNesting can be accessed
 	directly.  Increment ulCriticalNesting to keep a count of how many times
 	portENTER_CRITICAL() has been called. */
 	ulCriticalNesting++;
@@ -252,11 +257,11 @@ void vPortExitCritical( void )
 		if( ulCriticalNesting == portNO_CRITICAL_NESTING )
 		{
 			/* Enable interrupts as per portEXIT_CRITICAL().					*/
-			asm volatile ( 
-				"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/	
-				"MRS	R0, CPSR		\n\t"	/* Get CPSR.					*/	
-				"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.				*/	
-				"MSR	CPSR, R0		\n\t"	/* Write back modified value.	*/	
+			__asm volatile (
+				"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/
+				"MRS	R0, CPSR		\n\t"	/* Get CPSR.					*/
+				"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.				*/
+				"MSR	CPSR, R0		\n\t"	/* Write back modified value.	*/
 				"LDMIA	SP!, {R0}" );			/* Pop R0.						*/
 		}
 	}

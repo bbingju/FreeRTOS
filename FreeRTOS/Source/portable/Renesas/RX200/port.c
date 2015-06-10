@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -78,23 +83,23 @@
 
 /*-----------------------------------------------------------*/
 
-/* Tasks should start with interrupts enabled and in Supervisor mode, therefore 
+/* Tasks should start with interrupts enabled and in Supervisor mode, therefore
 PSW is set with U and I set, and PM and IPL clear. */
-#define portINITIAL_PSW     ( ( portSTACK_TYPE ) 0x00030000 )
+#define portINITIAL_PSW     ( ( StackType_t ) 0x00030000 )
 
 /*-----------------------------------------------------------*/
 
 /* The following lines are to ensure vSoftwareInterruptEntry can be referenced,
  and therefore installed in the vector table, when the FreeRTOS code is built
 as a library. */
-extern portBASE_TYPE vSoftwareInterruptEntry;
-const portBASE_TYPE * p_vSoftwareInterruptEntry = &vSoftwareInterruptEntry;
+extern BaseType_t vSoftwareInterruptEntry;
+const BaseType_t * p_vSoftwareInterruptEntry = &vSoftwareInterruptEntry;
 
 /*-----------------------------------------------------------*/
 
 /*
  * Function to start the first task executing - written in asm code as direct
- * access to registers is required. 
+ * access to registers is required.
  */
 static void prvStartFirstTask( void );
 
@@ -107,7 +112,7 @@ static void prvYieldHandler( void );
 
 /*
  * The entry point for the software interrupt handler.  This is the function
- * that calls the inline asm function prvYieldHandler().  It is installed in 
+ * that calls the inline asm function prvYieldHandler().  It is installed in
  * the vector table, but the code that installs it is in prvYieldHandler rather
  * than using a #pragma.
  */
@@ -122,10 +127,10 @@ extern void vTaskSwitchContext( void );
 
 /*-----------------------------------------------------------*/
 
-/* 
- * See header file for description. 
+/*
+ * See header file for description.
  */
-portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE pxCode, void *pvParameters )
+StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 {
 	/* Offset to end up on 8 byte boundary. */
 	pxTopOfStack--;
@@ -137,7 +142,7 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE
 	pxTopOfStack--;
  	*pxTopOfStack = portINITIAL_PSW;
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) pxCode;
+	*pxTopOfStack = ( StackType_t ) pxCode;
 
 	/* When debugging it can be useful if every register is set to a known
 	value.  Otherwise code space can be saved by just setting the registers
@@ -179,9 +184,9 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE
 		pxTopOfStack -= 15;
 	}
 	#endif
-	
-	*pxTopOfStack = ( portSTACK_TYPE ) pvParameters; /* R1 */
-	pxTopOfStack--;				
+
+	*pxTopOfStack = ( StackType_t ) pvParameters; /* R1 */
+	pxTopOfStack--;
 	*pxTopOfStack = 0x12345678; /* Accumulator. */
 	pxTopOfStack--;
 	*pxTopOfStack = 0x87654321; /* Accumulator. */
@@ -190,7 +195,7 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xPortStartScheduler( void )
+BaseType_t xPortStartScheduler( void )
 {
 extern void vApplicationSetupTimerInterrupt( void );
 
@@ -198,19 +203,19 @@ extern void vApplicationSetupTimerInterrupt( void );
 	if( pxCurrentTCB != NULL )
 	{
 		/* Call an application function to set up the timer that will generate the
-		tick interrupt.  This way the application can decide which peripheral to 
+		tick interrupt.  This way the application can decide which peripheral to
 		use.  A demo application is provided to show a suitable example. */
 		vApplicationSetupTimerInterrupt();
 
-		/* Enable the software interrupt. */		
+		/* Enable the software interrupt. */
 		_IEN( _ICU_SWINT ) = 1;
-		
+
 		/* Ensure the software interrupt is clear. */
 		_IR( _ICU_SWINT ) = 0;
-		
+
 		/* Ensure the software interrupt is set to the kernel priority. */
 		_IPR( _ICU_SWINT ) = configKERNEL_INTERRUPT_PRIORITY;
-	
+
 		/* Start the first task. */
 		prvStartFirstTask();
 	}
@@ -231,13 +236,13 @@ static void prvStartFirstTask( void )
 	Just ensure the current stack is the user stack. */
 	SETPSW	U
 
-	/* Obtain the location of the stack associated with which ever task 
+	/* Obtain the location of the stack associated with which ever task
 	pxCurrentTCB is currently pointing to. */
 	MOV.L	#_pxCurrentTCB, R15
 	MOV.L	[R15], R15
 	MOV.L	[R15], R0
 
-	/* Restore the registers from the stack of the task pointed to by 
+	/* Restore the registers from the stack of the task pointed to by
 	pxCurrentTCB. */
     POP		R15
     MVTACLO	R15 		/* Accumulator low 32 bits. */
@@ -279,18 +284,18 @@ static void prvYieldHandler( void )
 	SETPSW	I
 
 	/* Move the data that was automatically pushed onto the interrupt stack when
-	the interrupt occurred from the interrupt stack to the user stack.  
-	
+	the interrupt occurred from the interrupt stack to the user stack.
+
 	R15 is saved before it is clobbered. */
 	PUSH.L	R15
-	
+
 	/* Read the user stack pointer. */
 	MVFC	USP, R15
-	
+
 	/* Move the address down to the data being moved. */
 	SUB		#12, R15
 	MVTC	R15, USP
-	
+
 	/* Copy the data across. */
 	MOV.L	[ R0 ], [ R15 ] ; R15
 	MOV.L 	4[ R0 ], 4[ R15 ]  ; PC
@@ -298,13 +303,13 @@ static void prvYieldHandler( void )
 
 	/* Move the interrupt stack pointer to its new correct position. */
 	ADD	#12, R0
-	
+
 	/* All the rest of the registers are saved directly to the user stack. */
 	SETPSW	U
 
 	/* Save the rest of the general registers (R15 has been saved already). */
 	PUSHM	R1-R14
-	
+
 	/* Save the accumulator. */
 	MVFACHI	R15
 	PUSH.L	R15
@@ -316,7 +321,7 @@ static void prvYieldHandler( void )
 	MOV.L	#_pxCurrentTCB, R15
 	MOV.L	[ R15 ], R15
 	MOV.L	R0, [ R15 ]
-			
+
 	/* Ensure the interrupt mask is set to the syscall priority while the kernel
 	structures are being accessed. */
 	MVTIPL	#configMAX_SYSCALL_INTERRUPT_PRIORITY
@@ -348,8 +353,10 @@ static void prvYieldHandler( void )
 
 void vPortEndScheduler( void )
 {
-	/* Not implemented as there is nothing to return to. */
-	
+	/* Not implemented in ports where there is nothing to return to.
+	Artificially force an assert. */
+	configASSERT( pxCurrentTCB == NULL );
+
 	/* The following line is just to prevent the symbol getting optimised away. */
 	( void ) vTaskSwitchContext();
 }

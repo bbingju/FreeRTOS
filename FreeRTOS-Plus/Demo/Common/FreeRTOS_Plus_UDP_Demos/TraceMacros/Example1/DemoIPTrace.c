@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -105,17 +110,18 @@ xExampleDebugStatEntry_t xIPTraceValues[] =
 {
 	/* Comment out array entries to remove individual trace items. */
 
+	{ iptraceID_NETWORK_INTERFACE_RECEIVE,			( const uint8_t * const ) "Packets received by the network interface",			prvIncrementEventCount, 0 },
+	{ iptraceID_NETWORK_INTERFACE_TRANSMIT,			( const uint8_t * const ) "Count of transmitted packets",						prvIncrementEventCount, 0 },
+	{ iptraceID_PACKET_DROPPED_TO_GENERATE_ARP,		( const uint8_t * const ) "Count of packets dropped to generate ARP",			prvIncrementEventCount, 0 },
 	{ iptraceID_NETWORK_BUFFER_OBTAINED,			( const uint8_t * const ) "Lowest ever available network buffers",				prvStoreLowest, 0xffffUL },
 	{ iptraceID_NETWORK_EVENT_RECEIVED,				( const uint8_t * const ) "Lowest ever free space in network event queue",		prvStoreLowest, 0xffffUL },
 	{ iptraceID_FAILED_TO_OBTAIN_NETWORK_BUFFER,	( const uint8_t * const ) "Count of failed attempts to obtain a network buffer",prvIncrementEventCount, 0 },
 	{ iptraceID_ARP_TABLE_ENTRY_EXPIRED,			( const uint8_t * const ) "Count of expired ARP entries",						prvIncrementEventCount, 0 },
-	{ iptraceID_PACKET_DROPPED_TO_GENERATE_ARP,		( const uint8_t * const ) "Count of packets dropped to generate ARP",			prvIncrementEventCount, 0 },
 	{ iptraceID_FAILED_TO_CREATE_SOCKET,			( const uint8_t * const ) "Count of failures to create a socket",				prvIncrementEventCount, 0 },
 	{ iptraceID_RECVFROM_DISCARDING_BYTES,			( const uint8_t * const ) "Count of times recvfrom() has discarding bytes",		prvIncrementEventCount, 0 },
 	{ iptraceID_ETHERNET_RX_EVENT_LOST,				( const uint8_t * const ) "Count of lost Ethenret Rx events (event queue full?)",prvIncrementEventCount, 0 },
 	{ iptraceID_STACK_TX_EVENT_LOST,				( const uint8_t * const ) "Count of lost IP stack events (event queue full?)",	prvIncrementEventCount, 0 },
 	{ ipconfigID_BIND_FAILED,						( const uint8_t * const ) "Count of failed calls to bind()",					prvIncrementEventCount, 0 },
-	{ iptraceID_NETWORK_INTERFACE_TRANSMIT,			( const uint8_t * const ) "Count of transmitted packets",						prvIncrementEventCount, 0 },
 	{ iptraceID_RECVFROM_TIMEOUT,					( const uint8_t * const ) "Count of receive timeouts",							prvIncrementEventCount, 0 },
 	{ iptraceID_SENDTO_DATA_TOO_LONG,				( const uint8_t * const ) "Count of failed sends due to oversized payload",		prvIncrementEventCount, 0 },
 	{ iptraceID_SENDTO_SOCKET_NOT_BOUND,			( const uint8_t * const ) "Count of failed sends due to unbound socket",		prvIncrementEventCount, 0 },
@@ -126,17 +132,17 @@ xExampleDebugStatEntry_t xIPTraceValues[] =
 
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xExampleDebugStatEntries( void )
+BaseType_t xExampleDebugStatEntries( void )
 {
 	/* Return the number of entries in the xIPTraceValues[] table. */
-	return ( portBASE_TYPE ) ( sizeof( xIPTraceValues ) / sizeof( xExampleDebugStatEntry_t ) );
+	return ( BaseType_t ) ( sizeof( xIPTraceValues ) / sizeof( xExampleDebugStatEntry_t ) );
 }
 /*-----------------------------------------------------------*/
 
 void vExampleDebugStatUpdate( uint8_t ucIdentifier, uint32_t ulValue )
 {
-portBASE_TYPE xIndex;
-const portBASE_TYPE xEntries = sizeof( xIPTraceValues ) / sizeof( xExampleDebugStatEntry_t );
+BaseType_t xIndex;
+const BaseType_t xEntries = sizeof( xIPTraceValues ) / sizeof( xExampleDebugStatEntry_t );
 
 	/* Update an entry in the xIPTraceValues[] table.  Each row in the table
 	includes a pointer to a function that performs the actual update.  This

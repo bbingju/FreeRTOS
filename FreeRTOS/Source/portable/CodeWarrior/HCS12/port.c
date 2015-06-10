@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -92,7 +97,7 @@ scheduler startup function. */
 	start the scheduler directly because the header file containing the 
 	xPortStartScheduler() prototype is part of the common kernel code, and 
 	therefore cannot use the CODE_SEG pragma. */
-	static portBASE_TYPE xBankedStartScheduler( void );
+	static BaseType_t xBankedStartScheduler( void );
 
 #pragma CODE_SEG DEFAULT
 
@@ -102,24 +107,24 @@ until the nesting depth reaches 0.  This variable simply tracks the nesting
 depth.  Each task maintains it's own critical nesting depth variable so 
 uxCriticalNesting is saved and restored from the task stack during a context
 switch. */
-volatile unsigned portBASE_TYPE uxCriticalNesting = 0xff;
+volatile UBaseType_t uxCriticalNesting = 0xff;
 
 /*-----------------------------------------------------------*/
 
 /* 
  * See header file for description. 
  */
-portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE pxCode, void *pvParameters )
+StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 {
 	/* 
 		Place a few bytes of known values on the bottom of the stack.
 		This can be uncommented to provide useful stack markers when debugging.
 
-		*pxTopOfStack = ( portSTACK_TYPE ) 0x11;
+		*pxTopOfStack = ( StackType_t ) 0x11;
 		pxTopOfStack--;
-		*pxTopOfStack = ( portSTACK_TYPE ) 0x22;
+		*pxTopOfStack = ( StackType_t ) 0x22;
 		pxTopOfStack--;
-		*pxTopOfStack = ( portSTACK_TYPE ) 0x33;
+		*pxTopOfStack = ( StackType_t ) 0x33;
 		pxTopOfStack--;
 	*/
 
@@ -131,47 +136,47 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE
 
 
 	/* The address of the task function is placed in the stack byte at a time. */
-	*pxTopOfStack = ( portSTACK_TYPE ) *( ((portSTACK_TYPE *) (&pxCode) ) + 1 );
+	*pxTopOfStack = ( StackType_t ) *( ((StackType_t *) (&pxCode) ) + 1 );
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) *( ((portSTACK_TYPE *) (&pxCode) ) + 0 );
+	*pxTopOfStack = ( StackType_t ) *( ((StackType_t *) (&pxCode) ) + 0 );
 	pxTopOfStack--;
 
 	/* Next are all the registers that form part of the task context. */
 
 	/* Y register */
-	*pxTopOfStack = ( portSTACK_TYPE ) 0xff;
+	*pxTopOfStack = ( StackType_t ) 0xff;
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0xee;
+	*pxTopOfStack = ( StackType_t ) 0xee;
 	pxTopOfStack--;
 
 	/* X register */
-	*pxTopOfStack = ( portSTACK_TYPE ) 0xdd;
+	*pxTopOfStack = ( StackType_t ) 0xdd;
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0xcc;
+	*pxTopOfStack = ( StackType_t ) 0xcc;
 	pxTopOfStack--;
  
 	/* A register contains parameter high byte. */
-	*pxTopOfStack = ( portSTACK_TYPE ) *( ((portSTACK_TYPE *) (&pvParameters) ) + 0 );
+	*pxTopOfStack = ( StackType_t ) *( ((StackType_t *) (&pvParameters) ) + 0 );
 	pxTopOfStack--;
 
 	/* B register contains parameter low byte. */
-	*pxTopOfStack = ( portSTACK_TYPE ) *( ((portSTACK_TYPE *) (&pvParameters) ) + 1 );
+	*pxTopOfStack = ( StackType_t ) *( ((StackType_t *) (&pvParameters) ) + 1 );
 	pxTopOfStack--;
 
 	/* CCR: Note that when the task starts interrupts will be enabled since
 	"I" bit of CCR is cleared */
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x00;
+	*pxTopOfStack = ( StackType_t ) 0x00;
 	pxTopOfStack--;
 	
 	#ifdef BANKED_MODEL
 		/* The page of the task. */
-		*pxTopOfStack = ( portSTACK_TYPE ) ( ( int ) pxCode );
+		*pxTopOfStack = ( StackType_t ) ( ( int ) pxCode );
 		pxTopOfStack--;
 	#endif
 	
 	/* Finally the critical nesting depth is initialised with 0 (not within
 	a critical section). */
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x00;
+	*pxTopOfStack = ( StackType_t ) 0x00;
 
 	return pxTopOfStack;
 }
@@ -190,7 +195,7 @@ static void prvSetupTimerInterrupt( void )
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xPortStartScheduler( void )
+BaseType_t xPortStartScheduler( void )
 {
 	/* xPortStartScheduler() does not start the scheduler directly because 
 	the header file containing the xPortStartScheduler() prototype is part 
@@ -204,7 +209,7 @@ portBASE_TYPE xPortStartScheduler( void )
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 
-static portBASE_TYPE xBankedStartScheduler( void )
+static BaseType_t xBankedStartScheduler( void )
 {
 	/* Configure the timer that will generate the RTOS tick.  Interrupts are
 	disabled when this function is called. */

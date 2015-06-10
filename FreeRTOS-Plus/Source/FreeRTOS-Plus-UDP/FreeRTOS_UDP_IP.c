@@ -1,14 +1,15 @@
 /*
- * FreeRTOS+UDP V1.0.0 (C) 2013 Real Time Engineers ltd.
+ * FreeRTOS+UDP V1.0.4 (C) 2014 Real Time Engineers ltd.
+ * All rights reserved
  *
  * This file is part of the FreeRTOS+UDP distribution.  The FreeRTOS+UDP license
  * terms are different to the FreeRTOS license terms.
  *
- * FreeRTOS+UDP uses a dual license model that allows the software to be used 
- * under a standard GPL open source license, or a commercial license.  The 
- * standard GPL license (unlike the modified GPL license under which FreeRTOS 
- * itself is distributed) requires that all software statically linked with 
- * FreeRTOS+UDP is also distributed under the same GPL V2 license terms.  
+ * FreeRTOS+UDP uses a dual license model that allows the software to be used
+ * under a standard GPL open source license, or a commercial license.  The
+ * standard GPL license (unlike the modified GPL license under which FreeRTOS
+ * itself is distributed) requires that all software statically linked with
+ * FreeRTOS+UDP is also distributed under the same GPL V2 license terms.
  * Details of both license options follow:
  *
  * - Open source licensing -
@@ -20,9 +21,9 @@
  *
  * - Commercial licensing -
  * Businesses and individuals that for commercial or other reasons cannot comply
- * with the terms of the GPL V2 license must obtain a commercial license before 
- * incorporating FreeRTOS+UDP into proprietary software for distribution in any 
- * form.  Commercial licenses can be purchased from http://shop.freertos.org/udp 
+ * with the terms of the GPL V2 license must obtain a commercial license before
+ * incorporating FreeRTOS+UDP into proprietary software for distribution in any
+ * form.  Commercial licenses can be purchased from http://shop.freertos.org/udp
  * and do not require any source files to be changed.
  *
  * FreeRTOS+UDP is distributed in the hope that it will be useful.  You cannot
@@ -94,7 +95,7 @@
 #define ipIP_VERSION_AND_HEADER_LENGTH_BYTE ( ( uint8_t ) 0x45 )
 
 /* Time delay between repeated attempts to initialise the network hardware. */
-#define ipINITIALISATION_RETRY_DELAY	( ( ( portTickType ) 3000 ) / portTICK_RATE_MS )
+#define ipINITIALISATION_RETRY_DELAY	( ( ( TickType_t ) 3000 ) / portTICK_RATE_MS )
 
 /* The local MAC address is accessed from within xDefaultPartUDPPacketHeader,
 rather than duplicated in its own variable. */
@@ -219,7 +220,7 @@ static void prvReturnEthernetFrame( xNetworkBufferDescriptor_t * const pxNetwork
 /*
  * Return the checksum generated over usDataLengthBytes from pucNextData.
  */
-static uint16_t prvGenerateChecksum( const uint8_t * const pucNextData, const uint16_t usDataLengthBytes );
+static uint16_t prvGenerateChecksum( const uint8_t * const pucNextData, const uint16_t usDataLengthBytes, BaseType_t xChecksumIsOffloaded );
 
 /*
  * The callback function that is assigned to all periodic processing timers -
@@ -245,7 +246,7 @@ static void prvRefreshARPCacheEntry( const xMACAddress_t * const pxMACAddress, c
  * Creates the pseudo header necessary then generate the checksum over the UDP
  * packet.  Returns the calculated checksum.
  */
-static uint16_t prvGenerateUDPChecksum( const xUDPPacket_t * const pxUDPPacket );
+static uint16_t prvGenerateUDPChecksum( const xUDPPacket_t * const pxUDPPacket, BaseType_t xChecksumIsOffloaded );
 
 /*
  * Look for ulIPAddress in the ARP cache.  If the IP address exists, copy the
@@ -292,7 +293,7 @@ static void prvCompleteUDPHeader( xNetworkBufferDescriptor_t *pxNetworkBuffer, x
  * zero.  Return pdPASS if the message was sent successfully, otherwise return
  * pdFALSE.
 */
-static portBASE_TYPE prvSendEventToIPTask( eIPEvent_t eEvent );
+static BaseType_t prvSendEventToIPTask( eIPEvent_t eEvent );
 
 /*
  * Generate and send an ARP request for the IP address passed in ulIPAddress.
@@ -334,7 +335,7 @@ static xTimerHandle xARPTimer = NULL;
 /* Used to ensure network down events cannot be missed when they cannot be
 posted to the network event queue because the network event queue is already
 full. */
-static portBASE_TYPE xNetworkDownEventPending = pdFALSE;
+static BaseType_t xNetworkDownEventPending = pdFALSE;
 
 /* For convenience, a MAC address of all zeros and another of all 0xffs are
 defined const for quick reference. */
@@ -391,7 +392,7 @@ xIPStackEvent_t xReceivedEvent;
 
 	/* Create the ARP timer, but don't start it until the network has
 	connected. */
-	xARPTimer = xTimerCreate( 	( const signed char * const ) "ARPTimer", ( ipARP_TIMER_PERIOD_MS / portTICK_RATE_MS ), pdTRUE, ( void * ) eARPTimerEvent, vIPFunctionsTimerCallback );
+	xARPTimer = xTimerCreate( "ARPTimer", ( ipARP_TIMER_PERIOD_MS / portTICK_RATE_MS ), pdTRUE, ( void * ) eARPTimerEvent, vIPFunctionsTimerCallback );
 	configASSERT( xARPTimer );
 
 	/* Generate a dummy message to say that the network connection has gone
@@ -462,7 +463,7 @@ xIPStackEvent_t xReceivedEvent;
 void FreeRTOS_NetworkDown( void )
 {
 static const xIPStackEvent_t xNetworkDownEvent = { eNetworkDownEvent, NULL };
-const portTickType xDontBlock = 0;
+const TickType_t xDontBlock = 0;
 
 	/* Simply send the network task the appropriate event. */
 	if( xQueueSendToBack( xNetworkEventQueue, &xNetworkDownEvent, xDontBlock ) != pdPASS )
@@ -478,10 +479,10 @@ const portTickType xDontBlock = 0;
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE FreeRTOS_NetworkDownFromISR( void )
+BaseType_t FreeRTOS_NetworkDownFromISR( void )
 {
 static const xIPStackEvent_t xNetworkDownEvent = { eNetworkDownEvent, NULL };
-portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
 	/* Simply send the network task the appropriate event. */
 	if( xQueueSendToBackFromISR( xNetworkEventQueue, &xNetworkDownEvent, &xHigherPriorityTaskWoken ) != pdPASS )
@@ -498,7 +499,7 @@ portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 }
 /*-----------------------------------------------------------*/
 
-void *FreeRTOS_GetUDPPayloadBuffer( size_t xRequestedSizeBytes, portTickType xBlockTimeTicks )
+void *FreeRTOS_GetUDPPayloadBuffer( size_t xRequestedSizeBytes, TickType_t xBlockTimeTicks )
 {
 xNetworkBufferDescriptor_t *pxNetworkBuffer;
 void *pvReturn;
@@ -546,9 +547,9 @@ uint8_t * FreeRTOS_GetMACAddress( void )
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE FreeRTOS_IPInit( const uint8_t ucIPAddress[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucNetMask[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucGatewayAddress[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucDNSServerAddress[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucMACAddress[ ipMAC_ADDRESS_LENGTH_BYTES ] )
+BaseType_t FreeRTOS_IPInit( const uint8_t ucIPAddress[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucNetMask[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucGatewayAddress[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucDNSServerAddress[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucMACAddress[ ipMAC_ADDRESS_LENGTH_BYTES ] )
 {
-static portBASE_TYPE xReturn = pdFALSE;
+static BaseType_t xReturn = pdFALSE;
 
 	/* Only create the IP event queue if it has not already been created, in
 	case this function is called more than once. */
@@ -556,7 +557,7 @@ static portBASE_TYPE xReturn = pdFALSE;
 	{
 		xNetworkEventQueue = xQueueCreate( ipconfigEVENT_QUEUE_LENGTH, sizeof( xIPStackEvent_t ) );
 		configASSERT( xNetworkEventQueue );
-		vQueueAddToRegistry( xNetworkEventQueue, ( signed char * ) "NetEvnt" );
+		vQueueAddToRegistry( xNetworkEventQueue, "NetEvnt" );
 	}
 
 	if( xNetworkBuffersInitialise() == pdPASS )
@@ -581,6 +582,10 @@ static portBASE_TYPE xReturn = pdFALSE;
 				#else
 				{
 					*ipLOCAL_IP_ADDRESS_POINTER = xNetworkAddressing.ulDefaultIPAddress;
+
+					/* Ensure the gateway is on the same subnet as the IP
+					address. */
+					configASSERT( ( ( *ipLOCAL_IP_ADDRESS_POINTER ) & xNetworkAddressing.ulNetMask ) == ( xNetworkAddressing.ulGatewayAddress & xNetworkAddressing.ulNetMask ) );
 				}
 				#endif /* ipconfigUSE_DHCP == 1 */
 
@@ -592,7 +597,7 @@ static portBASE_TYPE xReturn = pdFALSE;
 				FreeRTOS_SocketsInit();
 
 				/* Create the task that processes Ethernet and stack events. */
-				xReturn = xTaskCreate( prvIPTask, ( const signed char * const ) "UDP/IP", ipconfigUDP_TASK_STACK_SIZE_WORDS, NULL, ipconfigUDP_TASK_PRIORITY, NULL );
+				xReturn = xTaskCreate( prvIPTask, "UDP/IP", ipconfigUDP_TASK_STACK_SIZE_WORDS, NULL, ipconfigUDP_TASK_PRIORITY, NULL );
 			}
 		}
 	}
@@ -627,11 +632,11 @@ void FreeRTOS_GetAddressConfiguration( uint32_t *pulIPAddress, uint32_t *pulNetM
 
 #if ( ipconfigSUPPORT_OUTGOING_PINGS == 1 )
 
-	portBASE_TYPE FreeRTOS_SendPingRequest( uint32_t ulIPAddress, size_t xNumberOfBytesToSend, portTickType xBlockTimeTicks )
+	BaseType_t FreeRTOS_SendPingRequest( uint32_t ulIPAddress, size_t xNumberOfBytesToSend, TickType_t xBlockTimeTicks )
 	{
 	xNetworkBufferDescriptor_t *pxNetworkBuffer;
 	xICMPHeader_t *pxICMPHeader;
-	portBASE_TYPE xReturn = pdFAIL;
+	BaseType_t xReturn = pdFAIL;
 	static uint16_t usSequenceNumber = 0;
 	uint8_t *pucChar;
 	xIPStackEvent_t xStackTxEvent = { eStackTxEvent, NULL };
@@ -660,7 +665,7 @@ void FreeRTOS_GetAddressConfiguration( uint32_t *pulIPAddress, uint32_t *pulNetM
 				memset( ( void * ) pucChar, ( int ) ipECHO_DATA_FILL_BYTE, xNumberOfBytesToSend );
 
 				/* The message is complete, calculate the checksum. */
-				pxICMPHeader->usChecksum = prvGenerateChecksum( ( uint8_t * ) pxICMPHeader, ( uint16_t ) ( xNumberOfBytesToSend + sizeof( xICMPHeader_t ) ) );
+				pxICMPHeader->usChecksum = prvGenerateChecksum( ( uint8_t * ) pxICMPHeader, ( uint16_t ) ( xNumberOfBytesToSend + sizeof( xICMPHeader_t ) ), pdFALSE );
 
 				/* Complete the network buffer information. */
 				pxNetworkBuffer->ulIPAddress = ulIPAddress;
@@ -694,11 +699,11 @@ void FreeRTOS_GetAddressConfiguration( uint32_t *pulIPAddress, uint32_t *pulNetM
 
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE prvSendEventToIPTask( eIPEvent_t eEvent )
+static BaseType_t prvSendEventToIPTask( eIPEvent_t eEvent )
 {
 xIPStackEvent_t xEventMessage;
-const portTickType xDontBlock = 0;
-portBASE_TYPE xReturn;
+const TickType_t xDontBlock = 0;
+BaseType_t xReturn;
 
 	xEventMessage.eEventType = eEvent;
 	xReturn = xQueueSendToBack( xNetworkEventQueue, &xEventMessage, xDontBlock );
@@ -719,7 +724,7 @@ eIPEvent_t eMessage;
 	/* This time can be used to send more than one type of message to the IP
 	task.  The message ID is stored in the ID of the timer.  The strange
 	casting is to avoid compiler warnings. */
-	eMessage = ( eIPEvent_t ) ( ( int ) pvTimerGetTimerID( xTimer ) );
+	eMessage = ( eIPEvent_t ) ( ( BaseType_t ) pvTimerGetTimerID( xTimer ) );
 
 	prvSendEventToIPTask( eMessage );
 }
@@ -743,7 +748,7 @@ xNetworkBufferDescriptor_t *pxNetworkBuffer;
 
 static void prvAgeARPCache( void )
 {
-portBASE_TYPE x;
+BaseType_t x;
 
 	/* Loop through each entry in the ARP cache. */
 	for( x = 0; x < ipconfigARP_CACHE_ENTRIES; x++ )
@@ -786,7 +791,7 @@ portBASE_TYPE x;
 
 static eARPLookupResult_t prvGetARPCacheEntry( uint32_t *pulIPAddress, xMACAddress_t * const pxMACAddress )
 {
-portBASE_TYPE x;
+BaseType_t x;
 eARPLookupResult_t eReturn;
 uint32_t ulAddressToLookup;
 
@@ -868,7 +873,7 @@ uint32_t ulAddressToLookup;
 
 static void prvRefreshARPCacheEntry( const xMACAddress_t * const pxMACAddress, const uint32_t ulIPAddress )
 {
-portBASE_TYPE x, xEntryFound = pdFALSE, xOldestEntry = 0;
+BaseType_t x, xEntryFound = pdFALSE, xOldestEntry = 0;
 uint8_t ucMinAgeFound = 0U;
 
 	/* Only process the IP address if it is on the local network. */
@@ -980,7 +985,7 @@ xUDPHeader_t *pxUDPHeader;
 
 	if( ( ucSocketOptions & FREERTOS_SO_UDPCKSUM_OUT ) != 0U )
 	{
-		pxUDPHeader->usChecksum = prvGenerateUDPChecksum( pxUDPPacket );
+		pxUDPHeader->usChecksum = prvGenerateUDPChecksum( pxUDPPacket, ipconfigETHERNET_DRIVER_ADDS_UDP_CHECKSUM );
 		if( pxUDPHeader->usChecksum == 0x00 )
 		{
 			/* A calculated checksum of 0 must be inverted as 0 means the
@@ -1112,7 +1117,7 @@ xUDPHeader_t *pxUDPHeader;
 				pxIPHeader->usLength = FreeRTOS_htons( pxIPHeader->usLength );
 				pxIPHeader->ulDestinationIPAddress = pxNetworkBuffer->ulIPAddress;
 				pxIPHeader->usIdentification = usPacketIdentifier;
-				pxIPHeader->usHeaderChecksum = prvGenerateChecksum( ( uint8_t * ) &( pxIPHeader->ucVersionHeaderLength ), ipIP_HEADER_LENGTH );
+				pxIPHeader->usHeaderChecksum = prvGenerateChecksum( ( uint8_t * ) &( pxIPHeader->ucVersionHeaderLength ), ipIP_HEADER_LENGTH, ipconfigETHERNET_DRIVER_ADDS_IP_CHECKSUM );
 			}
 			else if ( eReturned == eARPCacheMiss )
 			{
@@ -1229,7 +1234,7 @@ xUDPHeader_t *pxUDPHeader;
 				pxNetworkBuffer->xDataLength = pxIPHeader->usLength + sizeof( xEthernetHeader_t );
 				pxIPHeader->usLength = FreeRTOS_htons( pxIPHeader->usLength );
 				pxIPHeader->ulDestinationIPAddress = pxNetworkBuffer->ulIPAddress;
-				pxIPHeader->usHeaderChecksum = prvGenerateChecksum( ( uint8_t * ) &( pxIPHeader->ucVersionHeaderLength ), ipIP_HEADER_LENGTH );
+				pxIPHeader->usHeaderChecksum = prvGenerateChecksum( ( uint8_t * ) &( pxIPHeader->ucVersionHeaderLength ), ipIP_HEADER_LENGTH, ipconfigETHERNET_DRIVER_ADDS_IP_CHECKSUM );
 			}
 			else if ( eReturned == eARPCacheMiss )
 			{
@@ -1293,7 +1298,7 @@ xARPPacket_t *pxARPPacket;
 
 	pxNetworkBuffer->xDataLength = sizeof( xARPPacket_t );
 
-	iptraceCREATING_ARP_REQUEST( ulIPAddress );
+	iptraceCREATING_ARP_REQUEST( pxNetworkBuffer->ulIPAddress );
 }
 /*-----------------------------------------------------------*/
 
@@ -1350,12 +1355,12 @@ static void prvProcessNetworkDownEvent( void )
 
 	#if ipconfigUSE_NETWORK_EVENT_HOOK == 1
 	{
-		static portBASE_TYPE xCallEventHook = pdFALSE;
+		static BaseType_t xCallEventHook = pdFALSE;
 
 		/* The first network down event is generated by the IP stack
 		itself to initialise the network hardware, so do not call the
 		network down event the first time through. */
-		if( xCallEventHook == pdFALSE )
+		if( xCallEventHook == pdTRUE )
 		{
 			vApplicationIPNetworkEventHook( eNetworkDown );
 		}
@@ -1398,7 +1403,9 @@ static void prvProcessNetworkDownEvent( void )
 			/* Static configuration is being used, so the network is now up. */
 			#if ipconfigFREERTOS_PLUS_NABTO == 1
 			{
-				vStartNabtoTask();
+				/* Return value is used in configASSERT() inside the
+				function. */
+				( void ) xStartNabtoTask();
 			}
 			#endif /* ipconfigFREERTOS_PLUS_NABTO */
 		}
@@ -1473,7 +1480,7 @@ static eFrameProcessingResult_t prvProcessIPPacket( const xIPPacket_t * const px
 eFrameProcessingResult_t eReturn = eReleaseBuffer;
 const xIPHeader_t * pxIPHeader;
 xUDPPacket_t *pxUDPPacket;
-portBASE_TYPE xChecksumIsCorrect;
+BaseType_t xChecksumIsCorrect;
 
 	pxIPHeader = &( pxIPPacket->xIPHeader );
 
@@ -1486,7 +1493,7 @@ portBASE_TYPE xChecksumIsCorrect;
 		if( ( pxIPHeader->ucVersionHeaderLength == ipIP_VERSION_AND_HEADER_LENGTH_BYTE ) && ( ( pxIPHeader->usFragmentOffset & ipFRAGMENT_OFFSET_BIT_MASK ) == 0U ) )
 		{
 			/* Is the IP header checksum correct? */
-			if( prvGenerateChecksum( ( uint8_t * ) &( pxIPHeader->ucVersionHeaderLength ), ipIP_HEADER_LENGTH ) == 0 )
+			if( prvGenerateChecksum( ( uint8_t * ) &( pxIPHeader->ucVersionHeaderLength ), ipIP_HEADER_LENGTH, ipconfigETHERNET_DRIVER_CHECKS_IP_CHECKSUM ) == 0 )
 			{
 				/* Add the IP and MAC addresses to the ARP table if they are not
 				already there - otherwise refresh the age of the existing
@@ -1528,7 +1535,7 @@ portBASE_TYPE xChecksumIsCorrect;
 						{
 							xChecksumIsCorrect = pdTRUE;
 						}
-						else if( prvGenerateUDPChecksum( pxUDPPacket ) == 0 )
+						else if( prvGenerateUDPChecksum( pxUDPPacket, ipconfigETHERNET_DRIVER_CHECKS_UDP_CHECKSUM ) == 0 )
 						{
 							xChecksumIsCorrect = pdTRUE;
 						}
@@ -1562,26 +1569,36 @@ portBASE_TYPE xChecksumIsCorrect;
 }
 /*-----------------------------------------------------------*/
 
-static uint16_t prvGenerateUDPChecksum( const xUDPPacket_t * const pxUDPPacket )
+static uint16_t prvGenerateUDPChecksum( const xUDPPacket_t * const pxUDPPacket, BaseType_t xChecksumIsOffloaded )
 {
 xPseudoHeader_t *pxPseudoHeader;
 uint16_t usLength, usReturn;
 
-	/* Map the pseudo header into the correct place within the real IP
-	header. */
-	pxPseudoHeader = ( xPseudoHeader_t * ) &( pxUDPPacket->xIPHeader.ucTimeToLive );
+	if( xChecksumIsOffloaded == pdFALSE )
+	{
+		/* Map the pseudo header into the correct place within the real IP
+		header. */
+		pxPseudoHeader = ( xPseudoHeader_t * ) &( pxUDPPacket->xIPHeader.ucTimeToLive );
 
-	/* Ordering here is important so as not to overwrite data that is required
-	but has not yet been used as the pseudo header overlaps the information
-	that is being copied into it. */
-	pxPseudoHeader->ulSourceAddress = pxUDPPacket->xIPHeader.ulSourceIPAddress;
-	pxPseudoHeader->ulDestinationAddress = pxUDPPacket->xIPHeader.ulDestinationIPAddress;
-	pxPseudoHeader->ucZeros = 0x00;
-	pxPseudoHeader->ucProtocol = ipPROTOCOL_UDP;
-	pxPseudoHeader->usUDPLength = pxUDPPacket->xUDPHeader.usLength;
+		/* Ordering here is important so as not to overwrite data that is required
+		but has not yet been used as the pseudo header overlaps the information
+		that is being copied into it. */
+		pxPseudoHeader->ulSourceAddress = pxUDPPacket->xIPHeader.ulSourceIPAddress;
+		pxPseudoHeader->ulDestinationAddress = pxUDPPacket->xIPHeader.ulDestinationIPAddress;
+		pxPseudoHeader->ucZeros = 0x00;
+		pxPseudoHeader->ucProtocol = ipPROTOCOL_UDP;
+		pxPseudoHeader->usUDPLength = pxUDPPacket->xUDPHeader.usLength;
 
-	usLength = FreeRTOS_ntohs( pxPseudoHeader->usUDPLength );
-	usReturn = prvGenerateChecksum( ( uint8_t * ) pxPseudoHeader, usLength + sizeof( xPseudoHeader_t ) );
+		usLength = FreeRTOS_ntohs( pxPseudoHeader->usUDPLength );
+		usReturn = prvGenerateChecksum( ( uint8_t * ) pxPseudoHeader, usLength + sizeof( xPseudoHeader_t ), pdFALSE );
+	}
+	else
+	{
+		/* The hardware will check the checksum.  Returning 0 allows this
+		function to be used to both check an incoming checksum and set an
+		outgoing checksum in this case. */
+		usReturn = 0;
+	}
 
 	return usReturn;
 }
@@ -1603,7 +1620,7 @@ uint16_t usLength, usReturn;
 		message itself. */
 		usDataLength -= sizeof( xIPHeader_t );
 
-		if( prvGenerateChecksum( ( uint8_t * ) &( pxICMPPacket->xICMPHeader ), usDataLength ) != 0 )
+		if( prvGenerateChecksum( ( uint8_t * ) &( pxICMPPacket->xICMPHeader ), usDataLength, pdFALSE ) != 0 )
 		{
 			eStatus = eInvalidChecksum;
 		}
@@ -1643,10 +1660,10 @@ uint16_t usLength, usReturn;
 	xICMPHeader_t *pxICMPHeader;
 	xIPHeader_t *pxIPHeader;
 
-		iptraceSENDING_PING_REPLY( pxIPHeader->ulSourceIPAddress );
-
 		pxICMPHeader = &( pxICMPPacket->xICMPHeader );
 		pxIPHeader = &( pxICMPPacket->xIPHeader );
+
+		iptraceSENDING_PING_REPLY( pxIPHeader->ulSourceIPAddress );
 
 		/* The checksum can be checked here - but a ping reply should be
 		returned even if the checksum is incorrect so the other end can
@@ -1710,42 +1727,53 @@ uint16_t usLength, usReturn;
 #endif /* ( ipconfigREPLY_TO_INCOMING_PINGS == 1 ) || ( ipconfigSUPPORT_OUTGOING_PINGS == 1 ) */
 /*-----------------------------------------------------------*/
 
-static uint16_t prvGenerateChecksum( const uint8_t * const pucNextData, const uint16_t usDataLengthBytes )
+static uint16_t prvGenerateChecksum( const uint8_t * const pucNextData, const uint16_t usDataLengthBytes, BaseType_t xChecksumIsOffloaded )
 {
 uint32_t ulChecksum = 0;
-uint16_t us, usDataLength16BitWords, *pusNextData;
+uint16_t us, usDataLength16BitWords, *pusNextData, usReturn;
 
-	/* There are half as many 16 bit words than bytes. */
-	usDataLength16BitWords = ( usDataLengthBytes >> 1U );
-
-	pusNextData = ( uint16_t * ) pucNextData;
-
-	for( us = 0U; us < usDataLength16BitWords; us++ )
+	if( xChecksumIsOffloaded == pdFALSE )
 	{
-		ulChecksum += ( uint32_t ) pusNextData[ us ];
-	}
+		/* There are half as many 16 bit words than bytes. */
+		usDataLength16BitWords = ( usDataLengthBytes >> 1U );
 
-	if( ( usDataLengthBytes & 0x01U ) != 0x00 )
-	{
-		/* There is one byte left over. */
-		#if ipconfigBYTE_ORDER == FREERTOS_LITTLE_ENDIAN
+		pusNextData = ( uint16_t * ) pucNextData;
+
+		for( us = 0U; us < usDataLength16BitWords; us++ )
 		{
-			ulChecksum += ( uint32_t ) pucNextData[ usDataLengthBytes - 1 ];
+			ulChecksum += ( uint32_t ) pusNextData[ us ];
 		}
-		#else
+
+		if( ( usDataLengthBytes & 0x01U ) != 0x00 )
 		{
-			us = ( uint16_t ) pucNextData[ usDataLengthBytes - 1 ];
-			ulChecksum += ( uint32_t ) ( us << 8 );
+			/* There is one byte left over. */
+			#if ipconfigBYTE_ORDER == FREERTOS_LITTLE_ENDIAN
+			{
+				ulChecksum += ( uint32_t ) pucNextData[ usDataLengthBytes - 1 ];
+			}
+			#else
+			{
+				us = ( uint16_t ) pucNextData[ usDataLengthBytes - 1 ];
+				ulChecksum += ( uint32_t ) ( us << 8 );
+			}
+			#endif
 		}
-		#endif
-	}
 
-	while( ( ulChecksum >> 16UL ) != 0x00UL )
+		while( ( ulChecksum >> 16UL ) != 0x00UL )
+		{
+			ulChecksum = ( ulChecksum & 0xffffUL ) + ( ulChecksum >> 16UL );
+		}
+
+		usReturn = ~( ( uint16_t ) ulChecksum );
+	}
+	else
 	{
-		ulChecksum = ( ulChecksum & 0xffffUL ) + ( ulChecksum >> 16UL );
+		/* The checksum is calculated by the hardware.  Return 0 here to ensure
+		this works for both incoming and outgoing checksums. */
+		usReturn = 0;
 	}
 
-	return ~( ( uint16_t ) ulChecksum );
+	return usReturn;
 }
 /*-----------------------------------------------------------*/
 

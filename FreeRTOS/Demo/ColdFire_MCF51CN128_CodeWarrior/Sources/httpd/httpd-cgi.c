@@ -61,7 +61,7 @@ HTTPD_CGI_CALL(rtos, "rtos-stats", rtos_stats );
 HTTPD_CGI_CALL(io, "led-io", led_io );
 
 
-static const struct httpd_cgi_call *calls[] = { &file, &tcp, &net, &rtos, &io, NULL };
+static const struct httpd_cgi_call * const calls[] = { &file, &tcp, &net, &rtos, &io, NULL };
 
 /*---------------------------------------------------------------------------*/
 static
@@ -207,7 +207,7 @@ PT_THREAD(net_stats(struct httpd_state *s, char *ptr))
 }
 /*---------------------------------------------------------------------------*/
 
-extern void vTaskList( signed char *pcWriteBuffer );
+extern void vTaskList( char *pcWriteBuffer );
 extern unsigned long ulCheckErrors;
 static char cCountBuf[ 32 ];
 long lRefreshCount = 0;
@@ -217,9 +217,9 @@ generate_rtos_stats(void *arg)
 	( void ) arg;
 	lRefreshCount++;
 	sprintf( cCountBuf, "<p><br>Refresh count = %d", lRefreshCount );
-    vTaskList( uip_appdata );
+    vTaskList( ( char * ) uip_appdata );
 	strcat( uip_appdata, cCountBuf );
-	
+
 	/* Have any errors been latched? */
 	if( ulCheckErrors != 0 )
 	{

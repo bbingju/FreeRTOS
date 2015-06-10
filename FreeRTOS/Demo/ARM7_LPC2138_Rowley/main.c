@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -124,12 +129,12 @@
 
 /* Demo application definitions. */
 #define mainQUEUE_SIZE						( 3 )
-#define mainLED_DELAY						( ( portTickType ) 500 / portTICK_RATE_MS )
-#define mainERROR_LED_DELAY					( ( portTickType ) 50 / portTICK_RATE_MS )
-#define mainCHECK_DELAY						( ( portTickType ) 5000 / portTICK_RATE_MS )
+#define mainLED_DELAY						( ( TickType_t ) 500 / portTICK_PERIOD_MS )
+#define mainERROR_LED_DELAY					( ( TickType_t ) 50 / portTICK_PERIOD_MS )
+#define mainCHECK_DELAY						( ( TickType_t ) 5000 / portTICK_PERIOD_MS )
 #define mainLIST_BUFFER_SIZE				2048
 #define mainNO_DELAY						( 0 )
-#define mainSHORT_DELAY						( 150 / portTICK_RATE_MS )
+#define mainSHORT_DELAY						( 150 / portTICK_PERIOD_MS )
 
 /* Task priorities. */
 #define mainLED_TASK_PRIORITY				( tskIDLE_PRIORITY + 2 )
@@ -143,15 +148,15 @@
 
 /* The semaphore used to wake the button task from within the external interrupt
 handler. */
-xSemaphoreHandle xButtonSemaphore;
+SemaphoreHandle_t xButtonSemaphore;
 
 /* The queue that is used to send message to vPrintTask for display in the
 terminal output window. */
-xQueueHandle xPrintQueue;
+QueueHandle_t xPrintQueue;
 
 /* The rate at which the LED will toggle.  The toggle rate increases if an
 error is detected in any task. */
-static portTickType xLED_Delay = mainLED_DELAY;
+static TickType_t xLED_Delay = mainLED_DELAY;
 /*-----------------------------------------------------------*/
 
 /*
@@ -216,10 +221,10 @@ int main( void )
     vStartRecursiveMutexTasks();
 
 	/* Start the tasks defined within this file. */
-	xTaskCreate( vLEDTask, ( signed char * ) "LED", configMINIMAL_STACK_SIZE, NULL, mainLED_TASK_PRIORITY, NULL );
-    xTaskCreate( vCheckTask, ( signed char * ) "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
-    xTaskCreate( vPrintTask, ( signed char * ) "Print", configMINIMAL_STACK_SIZE, NULL, mainPRINT_TASK_PRIORITY, NULL );
-    xTaskCreate( vButtonHandlerTask, ( signed char * ) "Button", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
+	xTaskCreate( vLEDTask, "LED", configMINIMAL_STACK_SIZE, NULL, mainLED_TASK_PRIORITY, NULL );
+    xTaskCreate( vCheckTask, "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
+    xTaskCreate( vPrintTask, "Print", configMINIMAL_STACK_SIZE, NULL, mainPRINT_TASK_PRIORITY, NULL );
+    xTaskCreate( vButtonHandlerTask, "Button", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();
@@ -260,7 +265,7 @@ static void vLEDTask( void *pvParameters )
 static void vCheckTask( void *pvParameters )
 {
 portBASE_TYPE xErrorOccurred = pdFALSE;
-portTickType xLastExecutionTime;
+TickType_t xLastExecutionTime;
 const char * const pcPassMessage = "PASS\n";
 const char * const pcFailMessage = "FAIL\n";
 
@@ -356,8 +361,8 @@ char *pcMessage;
 
 static void vButtonHandlerTask( void *pvParameters )
 {
-static signed char cListBuffer[ mainLIST_BUFFER_SIZE ];
-const signed char *pcList = &( cListBuffer[ 0 ] );
+static char cListBuffer[ mainLIST_BUFFER_SIZE ];
+const char *pcList = &( cListBuffer[ 0 ] );
 const char * const pcHeader = "\nTask          State  Priority  Stack	#\n************************************************";
 extern void (vButtonISRWrapper) ( void );
 
@@ -401,7 +406,7 @@ extern void (vButtonISRWrapper) ( void );
 }
 /*-----------------------------------------------------------*/
 
-void vApplicationStackOverflowHook( xTaskHandle pxTask, signed char *pcTaskName )
+void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 {
 	/* Check pcTaskName for the name of the offending task, or pxCurrentTCB
 	if pcTaskName has itself been corrupted. */

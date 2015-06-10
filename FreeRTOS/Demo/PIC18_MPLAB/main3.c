@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -66,37 +71,37 @@
  * THIS DEMO APPLICATION REQUIRES A LOOPBACK CONNECTOR TO BE FITTED TO THE PIC
  * USART PORT - connect pin 2 to pin 3 on J2.
  *
- * Instead of the normal single demo application, the PIC18F demo is split 
- * into several smaller programs of which this is the third.  This enables the 
- * demo's to be executed on the RAM limited 40 pin devices.  The 64 and 80 pin 
- * devices require a more costly development platform and are not so readily 
+ * Instead of the normal single demo application, the PIC18F demo is split
+ * into several smaller programs of which this is the third.  This enables the
+ * demo's to be executed on the RAM limited 40 pin devices.  The 64 and 80 pin
+ * devices require a more costly development platform and are not so readily
  * available.
  *
  * The RTOSDemo3 project is configured for a PIC18F452 device.  Main3.c starts
  * 5 tasks (including the idle task).
- * 
+ *
  * The first task repeatedly transmits a string of characters on the PIC USART
  * port.  The second task receives the characters, checking that the correct
- * sequence is maintained (i.e. what is transmitted is identical to that 
- * received).  Each transmitted and each received character causes an LED to 
+ * sequence is maintained (i.e. what is transmitted is identical to that
+ * received).  Each transmitted and each received character causes an LED to
  * flash.  See demo/common/minimal/comtest. c for more information.
  *
  * The third task continuously performs a 32 bit calculation.  This is a good
- * test of the context switch mechanism as the 8 bit architecture requires 
+ * test of the context switch mechanism as the 8 bit architecture requires
  * the use of several file registers to perform the 32 bit operations.  See
  * demo/common/minimal/integer. c for more information.
  *
  * The third task is the check task.  This periodically checks that the other
  * tasks are still running and have not experienced any errors.  If no errors
  * have been reported by either the comms or integer tasks an LED is flashed
- * with a frequency mainNO_ERROR_CHECK_PERIOD.  If an error is discovered the 
+ * with a frequency mainNO_ERROR_CHECK_PERIOD.  If an error is discovered the
  * frequency is increased to mainERROR_FLASH_RATE.
  *
  * The check task also provides a visual indication of a system reset by
- * flashing the one remaining LED (mainRESET_LED) when it starts.  After 
+ * flashing the one remaining LED (mainRESET_LED) when it starts.  After
  * this initial flash mainRESET_LED should remain off.
  *
- * http://www.FreeRTOS.org contains important information on the use of the 
+ * http://www.FreeRTOS.org contains important information on the use of the
  * PIC18F port.
  */
 
@@ -104,7 +109,7 @@
 Changes from V2.0.0
 
 	+ Delay periods are now specified using variables and constants of
-	  portTickType rather than unsigned long.
+	  TickType_t rather than unsigned long.
 */
 
 /* Scheduler include files. */
@@ -125,17 +130,17 @@ priority. */
 /* The period between executions of the check task before and after an error
 has been discovered.  If an error has been discovered the check task runs
 more frequently - increasing the LED flash rate. */
-#define mainNO_ERROR_CHECK_PERIOD		( ( portTickType ) 1000 / portTICK_RATE_MS )
-#define mainERROR_CHECK_PERIOD			( ( portTickType ) 100 / portTICK_RATE_MS )
+#define mainNO_ERROR_CHECK_PERIOD		( ( TickType_t ) 1000 / portTICK_PERIOD_MS )
+#define mainERROR_CHECK_PERIOD			( ( TickType_t ) 100 / portTICK_PERIOD_MS )
 
 /* The period for which mainRESET_LED remain on every reset. */
-#define mainRESET_LED_PERIOD			( ( portTickType ) 500 / portTICK_RATE_MS )
+#define mainRESET_LED_PERIOD			( ( TickType_t ) 500 / portTICK_PERIOD_MS )
 
 /* The LED that is toggled whenever a character is transmitted.
 mainCOMM_TX_RX_LED + 1 will be toggled every time a character is received. */
 #define mainCOMM_TX_RX_LED				( ( unsigned portBASE_TYPE ) 2 )
 
-/* The LED that is flashed by the check task at a rate that indicates the 
+/* The LED that is flashed by the check task at a rate that indicates the
 error status. */
 #define mainCHECK_TASK_LED				( ( unsigned portBASE_TYPE ) 1 )
 
@@ -147,9 +152,9 @@ error status. */
 #define mainBAUD_RATE					( ( unsigned long ) 57600 )
 /*-----------------------------------------------------------*/
 
-/* 
+/*
  * Task function which periodically checks the other tasks for errors.  Flashes
- * an LED at a rate that indicates whether an error has ever been detected. 
+ * an LED at a rate that indicates whether an error has ever been detected.
  */
 static void vErrorChecks( void *pvParameters );
 
@@ -172,7 +177,7 @@ void main( void )
 	vStartIntegerMathTasks( tskIDLE_PRIORITY );
 
 	/* Start the check task defined in this file. */
-	xTaskCreate( vErrorChecks, ( const char * const ) "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
+	xTaskCreate( vErrorChecks, "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
 
 	/* Start the scheduler.  This will never return. */
 	vTaskStartScheduler();
@@ -181,7 +186,7 @@ void main( void )
 
 static void vErrorChecks( void *pvParameters )
 {
-portTickType xDelayTime = mainNO_ERROR_CHECK_PERIOD;
+TickType_t xDelayTime = mainNO_ERROR_CHECK_PERIOD;
 volatile unsigned long ulDummy = 3UL;
 
 	/* Toggle the LED so we can see when a reset occurs. */
@@ -213,7 +218,7 @@ volatile unsigned long ulDummy = 3UL;
 			xDelayTime = mainERROR_CHECK_PERIOD;
 		}
 
-		/* Flash the LED for visual feedback.  The rate of the flash will 
+		/* Flash the LED for visual feedback.  The rate of the flash will
 		indicate the health of the system. */
 		vParTestToggleLED( mainCHECK_TASK_LED );
 	}

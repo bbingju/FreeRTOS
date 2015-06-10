@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -87,7 +92,7 @@
 Changes from V2.0.0
 
 	+ Delay periods are now specified using variables and constants of
-	  portTickType rather than unsigned portLONG.
+	  TickType_t rather than uint32_t.
 */
 
 #include <stdlib.h>
@@ -102,11 +107,11 @@ Changes from V2.0.0
 
 #define pollqSTACK_SIZE			configMINIMAL_STACK_SIZE
 #define pollqQUEUE_SIZE			( 10 )
-#define pollqPRODUCER_DELAY		( ( portTickType ) 200 / portTICK_RATE_MS )
-#define pollqCONSUMER_DELAY		( pollqPRODUCER_DELAY - ( portTickType ) ( 20 / portTICK_RATE_MS ) )
-#define pollqNO_DELAY			( ( portTickType ) 0 )
-#define pollqVALUES_TO_PRODUCE	( ( signed portBASE_TYPE ) 3 )
-#define pollqINITIAL_VALUE		( ( signed portBASE_TYPE ) 0 )
+#define pollqPRODUCER_DELAY		( ( TickType_t ) 200 / portTICK_PERIOD_MS )
+#define pollqCONSUMER_DELAY		( pollqPRODUCER_DELAY - ( TickType_t ) ( 20 / portTICK_PERIOD_MS ) )
+#define pollqNO_DELAY			( ( TickType_t ) 0 )
+#define pollqVALUES_TO_PRODUCE	( ( BaseType_t ) 3 )
+#define pollqINITIAL_VALUE		( ( BaseType_t ) 0 )
 
 /* The task that posts the incrementing number onto the queue. */
 static portTASK_FUNCTION_PROTO( vPolledQueueProducer, pvParameters );
@@ -116,16 +121,16 @@ static portTASK_FUNCTION_PROTO( vPolledQueueConsumer, pvParameters );
 
 /* Variables that are used to check that the tasks are still running with no
 errors. */
-static volatile signed portBASE_TYPE xPollingConsumerCount = pollqINITIAL_VALUE, xPollingProducerCount = pollqINITIAL_VALUE;
+static volatile BaseType_t xPollingConsumerCount = pollqINITIAL_VALUE, xPollingProducerCount = pollqINITIAL_VALUE;
 
 /*-----------------------------------------------------------*/
 
-void vStartAltPolledQueueTasks( unsigned portBASE_TYPE uxPriority )
+void vStartAltPolledQueueTasks( UBaseType_t uxPriority )
 {
-static xQueueHandle xPolledQueue;
+static QueueHandle_t xPolledQueue;
 
 	/* Create the queue used by the producer and consumer. */
-	xPolledQueue = xQueueCreate( pollqQUEUE_SIZE, ( unsigned portBASE_TYPE ) sizeof( unsigned portSHORT ) );
+	xPolledQueue = xQueueCreate( pollqQUEUE_SIZE, ( UBaseType_t ) sizeof( uint16_t ) );
 
 	/* vQueueAddToRegistry() adds the queue to the queue registry, if one is
 	in use.  The queue registry is provided as a means for kernel aware 
@@ -133,24 +138,24 @@ static xQueueHandle xPolledQueue;
 	is not being used.  The call to vQueueAddToRegistry() will be removed
 	by the pre-processor if configQUEUE_REGISTRY_SIZE is not defined or is 
 	defined to be less than 1. */
-	vQueueAddToRegistry( xPolledQueue, ( signed portCHAR * ) "AltPollQueue" );
+	vQueueAddToRegistry( xPolledQueue, "AltPollQueue" );
 
 
 	/* Spawn the producer and consumer. */
-	xTaskCreate( vPolledQueueConsumer, ( signed portCHAR * ) "QConsNB", pollqSTACK_SIZE, ( void * ) &xPolledQueue, uxPriority, ( xTaskHandle * ) NULL );
-	xTaskCreate( vPolledQueueProducer, ( signed portCHAR * ) "QProdNB", pollqSTACK_SIZE, ( void * ) &xPolledQueue, uxPriority, ( xTaskHandle * ) NULL );
+	xTaskCreate( vPolledQueueConsumer, "QConsNB", pollqSTACK_SIZE, ( void * ) &xPolledQueue, uxPriority, ( TaskHandle_t * ) NULL );
+	xTaskCreate( vPolledQueueProducer, "QProdNB", pollqSTACK_SIZE, ( void * ) &xPolledQueue, uxPriority, ( TaskHandle_t * ) NULL );
 }
 /*-----------------------------------------------------------*/
 
 static portTASK_FUNCTION( vPolledQueueProducer, pvParameters )
 {
-unsigned portSHORT usValue = ( unsigned portSHORT ) 0;
-signed portBASE_TYPE xError = pdFALSE, xLoop;
+uint16_t usValue = ( uint16_t ) 0;
+BaseType_t xError = pdFALSE, xLoop;
 
 	#ifdef USE_STDIO
-	void vPrintDisplayMessage( const portCHAR * const * ppcMessageToSend );
+	void vPrintDisplayMessage( const char * const * ppcMessageToSend );
 	
-		const portCHAR * const pcTaskStartMsg = "Alt polling queue producer task started.\r\n";
+		const char * const pcTaskStartMsg = "Alt polling queue producer task started.\r\n";
 
 		/* Queue a message for printing to say the task has started. */
 		vPrintDisplayMessage( &pcTaskStartMsg );
@@ -161,7 +166,7 @@ signed portBASE_TYPE xError = pdFALSE, xLoop;
 		for( xLoop = 0; xLoop < pollqVALUES_TO_PRODUCE; xLoop++ )
 		{
 			/* Send an incrementing number on the queue without blocking. */
-			if( xQueueAltSendToBack( *( ( xQueueHandle * ) pvParameters ), ( void * ) &usValue, pollqNO_DELAY ) != pdPASS )
+			if( xQueueAltSendToBack( *( ( QueueHandle_t * ) pvParameters ), ( void * ) &usValue, pollqNO_DELAY ) != pdPASS )
 			{
 				/* We should never find the queue full so if we get here there
 				has been an error. */
@@ -192,13 +197,13 @@ signed portBASE_TYPE xError = pdFALSE, xLoop;
 
 static portTASK_FUNCTION( vPolledQueueConsumer, pvParameters )
 {
-unsigned portSHORT usData, usExpectedValue = ( unsigned portSHORT ) 0;
-signed portBASE_TYPE xError = pdFALSE;
+uint16_t usData, usExpectedValue = ( uint16_t ) 0;
+BaseType_t xError = pdFALSE;
 
 	#ifdef USE_STDIO
-	void vPrintDisplayMessage( const portCHAR * const * ppcMessageToSend );
+	void vPrintDisplayMessage( const char * const * ppcMessageToSend );
 	
-		const portCHAR * const pcTaskStartMsg = "Alt blocking queue consumer task started.\r\n";
+		const char * const pcTaskStartMsg = "Alt blocking queue consumer task started.\r\n";
 
 		/* Queue a message for printing to say the task has started. */
 		vPrintDisplayMessage( &pcTaskStartMsg );
@@ -207,9 +212,9 @@ signed portBASE_TYPE xError = pdFALSE;
 	for( ;; )
 	{		
 		/* Loop until the queue is empty. */
-		while( uxQueueMessagesWaiting( *( ( xQueueHandle * ) pvParameters ) ) )
+		while( uxQueueMessagesWaiting( *( ( QueueHandle_t * ) pvParameters ) ) )
 		{
-			if( xQueueAltReceive( *( ( xQueueHandle * ) pvParameters ), &usData, pollqNO_DELAY ) == pdPASS )
+			if( xQueueAltReceive( *( ( QueueHandle_t * ) pvParameters ), &usData, pollqNO_DELAY ) == pdPASS )
 			{
 				if( usData != usExpectedValue )
 				{
@@ -246,9 +251,9 @@ signed portBASE_TYPE xError = pdFALSE;
 /*-----------------------------------------------------------*/
 
 /* This is called to check that all the created tasks are still running with no errors. */
-portBASE_TYPE xAreAltPollingQueuesStillRunning( void )
+BaseType_t xAreAltPollingQueuesStillRunning( void )
 {
-portBASE_TYPE xReturn;
+BaseType_t xReturn;
 
 	/* Check both the consumer and producer poll count to check they have both
 	been changed since out last trip round.  We do not need a critical section

@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -72,27 +77,27 @@
 
 	This demo creates three tasks all of which access the same recursive mutex:
 
-	prvRecursiveMutexControllingTask() has the highest priority so executes 
-	first and grabs the mutex.  It then performs some recursive accesses - 
-	between each of which it sleeps for a short period to let the lower 
+	prvRecursiveMutexControllingTask() has the highest priority so executes
+	first and grabs the mutex.  It then performs some recursive accesses -
+	between each of which it sleeps for a short period to let the lower
 	priority tasks execute.  When it has completed its demo functionality
 	it gives the mutex back before suspending itself.
 
 	prvRecursiveMutexBlockingTask() attempts to access the mutex by performing
-	a blocking 'take'.  The blocking task has a lower priority than the 
+	a blocking 'take'.  The blocking task has a lower priority than the
 	controlling	task so by the time it executes the mutex has already been
-	taken by the controlling task,  causing the blocking task to block.  It 
-	does not unblock until the controlling task has given the mutex back, 
-	and it does not actually run until the controlling task has suspended 
+	taken by the controlling task,  causing the blocking task to block.  It
+	does not unblock until the controlling task has given the mutex back,
+	and it does not actually run until the controlling task has suspended
 	itself (due to the relative priorities).  When it eventually does obtain
-	the mutex all it does is give the mutex back prior to also suspending 
-	itself.  At this point both the controlling task and the blocking task are 
+	the mutex all it does is give the mutex back prior to also suspending
+	itself.  At this point both the controlling task and the blocking task are
 	suspended.
 
 	prvRecursiveMutexPollingTask() runs at the idle priority.  It spins round
 	a tight loop attempting to obtain the mutex with a non-blocking call.  As
 	the lowest priority task it will not successfully obtain the mutex until
-	both the controlling and blocking tasks are suspended.  Once it eventually 
+	both the controlling and blocking tasks are suspended.  Once it eventually
 	does obtain the mutex it first unsuspends both the controlling task and
 	blocking task prior to giving the mutex back - resulting in the polling
 	task temporarily inheriting the controlling tasks priority.
@@ -106,8 +111,11 @@
 /* Demo app include files. */
 #include "recmutex.h"
 
-/* Priorities assigned to the three tasks. */
-#define recmuCONTROLLING_TASK_PRIORITY	( tskIDLE_PRIORITY + 2 )
+/* Priorities assigned to the three tasks.  recmuCONTROLLING_TASK_PRIORITY can
+be overridden by a definition in FreeRTOSConfig.h. */
+#ifndef recmuCONTROLLING_TASK_PRIORITY
+	#define recmuCONTROLLING_TASK_PRIORITY	( tskIDLE_PRIORITY + 2 )
+#endif
 #define recmuBLOCKING_TASK_PRIORITY		( tskIDLE_PRIORITY + 1 )
 #define recmuPOLLING_TASK_PRIORITY		( tskIDLE_PRIORITY + 0 )
 
@@ -115,9 +123,9 @@
 #define recmuMAX_COUNT					( 10 )
 
 /* Misc. */
-#define recmuSHORT_DELAY				( 20 / portTICK_RATE_MS )
-#define recmuNO_DELAY					( ( portTickType ) 0 )
-#define recmuTWO_TICK_DELAY				( ( portTickType ) 2 )
+#define recmuSHORT_DELAY				( 20 / portTICK_PERIOD_MS )
+#define recmuNO_DELAY					( ( TickType_t ) 0 )
+#define recmuEIGHT_TICK_DELAY			( ( TickType_t ) 8 )
 
 /* The three tasks as described at the top of this file. */
 static void prvRecursiveMutexControllingTask( void *pvParameters );
@@ -125,15 +133,15 @@ static void prvRecursiveMutexBlockingTask( void *pvParameters );
 static void prvRecursiveMutexPollingTask( void *pvParameters );
 
 /* The mutex used by the demo. */
-static xSemaphoreHandle xMutex;
+static SemaphoreHandle_t xMutex;
 
 /* Variables used to detect and latch errors. */
-static volatile portBASE_TYPE xErrorOccurred = pdFALSE, xControllingIsSuspended = pdFALSE, xBlockingIsSuspended = pdFALSE;
-static volatile unsigned portBASE_TYPE uxControllingCycles = 0, uxBlockingCycles = 0, uxPollingCycles = 0;
+static volatile BaseType_t xErrorOccurred = pdFALSE, xControllingIsSuspended = pdFALSE, xBlockingIsSuspended = pdFALSE;
+static volatile UBaseType_t uxControllingCycles = 0, uxBlockingCycles = 0, uxPollingCycles = 0;
 
-/* Handles of the two higher priority tasks, required so they can be resumed 
+/* Handles of the two higher priority tasks, required so they can be resumed
 (unsuspended). */
-static xTaskHandle xControllingTaskHandle, xBlockingTaskHandle;
+static TaskHandle_t xControllingTaskHandle, xBlockingTaskHandle;
 
 /*-----------------------------------------------------------*/
 
@@ -144,26 +152,26 @@ void vStartRecursiveMutexTasks( void )
 	xMutex = xSemaphoreCreateRecursiveMutex();
 
 	/* vQueueAddToRegistry() adds the mutex to the registry, if one is
-	in use.  The registry is provided as a means for kernel aware 
+	in use.  The registry is provided as a means for kernel aware
 	debuggers to locate mutex and has no purpose if a kernel aware debugger
 	is not being used.  The call to vQueueAddToRegistry() will be removed
-	by the pre-processor if configQUEUE_REGISTRY_SIZE is not defined or is 
+	by the pre-processor if configQUEUE_REGISTRY_SIZE is not defined or is
 	defined to be less than 1. */
-	vQueueAddToRegistry( ( xQueueHandle ) xMutex, ( signed portCHAR * ) "Recursive_Mutex" );
+	vQueueAddToRegistry( ( QueueHandle_t ) xMutex, "Recursive_Mutex" );
 
 
 	if( xMutex != NULL )
 	{
-		xTaskCreate( prvRecursiveMutexControllingTask, ( signed portCHAR * ) "Rec1", configMINIMAL_STACK_SIZE, NULL, recmuCONTROLLING_TASK_PRIORITY, &xControllingTaskHandle );
-        xTaskCreate( prvRecursiveMutexBlockingTask, ( signed portCHAR * ) "Rec2", configMINIMAL_STACK_SIZE, NULL, recmuBLOCKING_TASK_PRIORITY, &xBlockingTaskHandle );
-        xTaskCreate( prvRecursiveMutexPollingTask, ( signed portCHAR * ) "Rec3", configMINIMAL_STACK_SIZE, NULL, recmuPOLLING_TASK_PRIORITY, NULL );
+		xTaskCreate( prvRecursiveMutexControllingTask, "Rec1", configMINIMAL_STACK_SIZE, NULL, recmuCONTROLLING_TASK_PRIORITY, &xControllingTaskHandle );
+        xTaskCreate( prvRecursiveMutexBlockingTask, "Rec2", configMINIMAL_STACK_SIZE, NULL, recmuBLOCKING_TASK_PRIORITY, &xBlockingTaskHandle );
+        xTaskCreate( prvRecursiveMutexPollingTask, "Rec3", configMINIMAL_STACK_SIZE, NULL, recmuPOLLING_TASK_PRIORITY, NULL );
 	}
 }
 /*-----------------------------------------------------------*/
 
 static void prvRecursiveMutexControllingTask( void *pvParameters )
 {
-unsigned portBASE_TYPE ux;
+UBaseType_t ux;
 
 	/* Just to remove compiler warning. */
 	( void ) pvParameters;
@@ -183,7 +191,7 @@ unsigned portBASE_TYPE ux;
 		{
 			/* We should now be able to take the mutex as many times as
 			we like.
-			
+
 			The first time through the mutex will be immediately available, on
 			subsequent times through the mutex will be held by the polling task
 			at this point and this Take will cause the polling task to inherit
@@ -191,14 +199,14 @@ unsigned portBASE_TYPE ux;
 			long enough to ensure the polling task will execute again before the
 			block time expires.  If the block time does expire then the error
 			flag will be set here. */
-			if( xSemaphoreTakeRecursive( xMutex, recmuTWO_TICK_DELAY ) != pdPASS )
+			if( xSemaphoreTakeRecursive( xMutex, recmuEIGHT_TICK_DELAY ) != pdPASS )
 			{
 				xErrorOccurred = pdTRUE;
 			}
 
 			/* Ensure the other task attempting to access the mutex (and the
 			other demo tasks) are able to execute to ensure they either block
-			(where a block time is specified) or return an error (where no 
+			(where a block time is specified) or return an error (where no
 			block time is specified) as the mutex is held by this task. */
 			vTaskDelay( recmuSHORT_DELAY );
 		}
@@ -222,17 +230,17 @@ unsigned portBASE_TYPE ux;
 		}
 
 		/* Having given it back the same number of times as it was taken, we
-		should no longer be the mutex owner, so the next give sh ould fail. */
+		should no longer be the mutex owner, so the next give should fail. */
 		if( xSemaphoreGiveRecursive( xMutex ) == pdPASS )
 		{
 			xErrorOccurred = pdTRUE;
 		}
 
-		/* Keep count of the number of cycles this task has performed so a 
+		/* Keep count of the number of cycles this task has performed so a
 		stall can be detected. */
 		uxControllingCycles++;
 
-		/* Suspend ourselves to the blocking task can execute. */
+		/* Suspend ourselves so the blocking task can execute. */
 		xControllingIsSuspended = pdTRUE;
 		vTaskSuspend( NULL );
 		xControllingIsSuspended = pdFALSE;
@@ -249,10 +257,12 @@ static void prvRecursiveMutexBlockingTask( void *pvParameters )
 	{
 		/* This task will run while the controlling task is blocked, and the
 		controlling task will block only once it has the mutex - therefore
-		this call should block until the controlling task has given up the 
-		mutex, and not actually execute	past this call until the controlling 
-		task is suspended. */
-		if( xSemaphoreTakeRecursive( xMutex, portMAX_DELAY ) == pdPASS )
+		this call should block until the controlling task has given up the
+		mutex, and not actually execute	past this call until the controlling
+		task is suspended.  portMAX_DELAY - 1 is used instead of portMAX_DELAY
+		to ensure the task's state is reported as Blocked and not Suspended in
+		a later call to configASSERT() (within the polling task). */
+		if( xSemaphoreTakeRecursive( xMutex, ( portMAX_DELAY - 1 ) ) == pdPASS )
 		{
 			if( xControllingIsSuspended != pdTRUE )
 			{
@@ -287,7 +297,7 @@ static void prvRecursiveMutexBlockingTask( void *pvParameters )
 			xErrorOccurred = pdTRUE;
 		}
 
-		/* Keep count of the number of cycles this task has performed so a 
+		/* Keep count of the number of cycles this task has performed so a
 		stall can be detected. */
 		uxBlockingCycles++;
 	}
@@ -306,6 +316,13 @@ static void prvRecursiveMutexPollingTask( void *pvParameters )
 		happen when the controlling task is also suspended. */
 		if( xSemaphoreTakeRecursive( xMutex, recmuNO_DELAY ) == pdPASS )
 		{
+			#if( INCLUDE_eTaskGetState == 1 )
+			{
+				configASSERT( eTaskGetState( xControllingTaskHandle ) == eSuspended );
+				configASSERT( eTaskGetState( xBlockingTaskHandle ) == eSuspended );
+			}
+			#endif /* INCLUDE_eTaskGetState */
+
 			/* Is the blocking task suspended? */
 			if( ( xBlockingIsSuspended != pdTRUE ) || ( xControllingIsSuspended != pdTRUE ) )
 			{
@@ -313,7 +330,7 @@ static void prvRecursiveMutexPollingTask( void *pvParameters )
 			}
 			else
 			{
-				/* Keep count of the number of cycles this task has performed 
+				/* Keep count of the number of cycles this task has performed
 				so a stall can be detected. */
 				uxPollingCycles++;
 
@@ -328,19 +345,40 @@ static void prvRecursiveMutexPollingTask( void *pvParameters )
 				mutex by the time this fixed period has expired. */
 				vTaskResume( xBlockingTaskHandle );
                 vTaskResume( xControllingTaskHandle );
-			
+
 				/* The other two tasks should now have executed and no longer
 				be suspended. */
 				if( ( xBlockingIsSuspended == pdTRUE ) || ( xControllingIsSuspended == pdTRUE ) )
 				{
 					xErrorOccurred = pdTRUE;
-				}				
-			
+				}
+
+				#if( INCLUDE_uxTaskPriorityGet == 1 )
+				{
+					/* Check priority inherited. */
+					configASSERT( uxTaskPriorityGet( NULL ) == recmuCONTROLLING_TASK_PRIORITY );
+				}
+				#endif /* INCLUDE_uxTaskPriorityGet */
+
+				#if( INCLUDE_eTaskGetState == 1 )
+				{
+					configASSERT( eTaskGetState( xControllingTaskHandle ) == eBlocked );
+					configASSERT( eTaskGetState( xBlockingTaskHandle ) == eBlocked );
+				}
+				#endif /* INCLUDE_eTaskGetState */
+
 				/* Release the mutex, disinheriting the higher priority again. */
 				if( xSemaphoreGiveRecursive( xMutex ) != pdPASS )
 				{
 					xErrorOccurred = pdTRUE;
 				}
+
+				#if( INCLUDE_uxTaskPriorityGet == 1 )
+				{
+					/* Check priority disinherited. */
+					configASSERT( uxTaskPriorityGet( NULL ) == recmuPOLLING_TASK_PRIORITY );
+				}
+				#endif /* INCLUDE_uxTaskPriorityGet */
 			}
 		}
 
@@ -354,10 +392,10 @@ static void prvRecursiveMutexPollingTask( void *pvParameters )
 /*-----------------------------------------------------------*/
 
 /* This is called to check that all the created tasks are still running. */
-portBASE_TYPE xAreRecursiveMutexTasksStillRunning( void )
+BaseType_t xAreRecursiveMutexTasksStillRunning( void )
 {
-portBASE_TYPE xReturn;
-static unsigned portBASE_TYPE uxLastControllingCycles = 0, uxLastBlockingCycles = 0, uxLastPollingCycles = 0;
+BaseType_t xReturn;
+static UBaseType_t uxLastControllingCycles = 0, uxLastBlockingCycles = 0, uxLastPollingCycles = 0;
 
 	/* Is the controlling task still cycling? */
 	if( uxLastControllingCycles == uxControllingCycles )

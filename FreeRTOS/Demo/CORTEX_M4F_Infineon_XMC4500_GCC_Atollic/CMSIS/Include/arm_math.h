@@ -1337,7 +1337,7 @@ extern "C"
   typedef struct
   {
     uint16_t numRows;     /**< number of rows of the matrix.     */
-    uint16_t numCols;     /**<he matrix. columns of the matrix.  */
+    uint16_t numCols;     /**< number of columns of the matrix.  */
     float32_t *pData;     /**< points to the data of the matrix. */
   } arm_matrix_instance_f32;
 
@@ -1348,7 +1348,7 @@ extern "C"
   typedef struct
   {
     uint16_t numRows;     /**< number of rows of the matrix.     */
-    uint16_t numCols;     /**<he matrix. columns of the matrix.  */
+    uint16_t numCols;     /**< number of columns of the matrix.  */
     q15_t *pData;         /**< points to the data of the matrix. */
 
   } arm_matrix_instance_q15;
@@ -1360,7 +1360,7 @@ extern "C"
   typedef struct
   {
     uint16_t numRows;     /**< number of rows of the matrix.     */
-    uint16_t numCols;     /**<he matrix. columns of the matrix.  */
+    uint16_t numCols;     /**< number of columns of the matrix.  */
     q31_t *pData;         /**< points to the data of the matrix. */
 
   } arm_matrix_instance_q31;
@@ -1582,7 +1582,7 @@ extern "C"
    * @brief Q15 matrix scaling.
    * @param[in]       *pSrc points to input matrix
    * @param[in]       scaleFract fractional portion of the scale factor
-   * @param[in]       shifthe matrix. bits to shift the result by
+   * @param[in]       shift number of bits to shift the result by
    * @param[out]      *pDst points to output matrix
    * @return     The function returns either
    * <code>ARM_MATH_SIZE_MISMATCH</code> or <code>ARM_MATH_SUCCESS</code> based on the outcome of size checking.
@@ -1598,7 +1598,7 @@ extern "C"
    * @brief Q31 matrix scaling.
    * @param[in]       *pSrc points to input matrix
    * @param[in]       scaleFract fractional portion of the scale factor
-   * @param[in]       shifthe matrix. bits to shift the result by
+   * @param[in]       shift number of bits to shift the result by
    * @param[out]      *pDst points to output matrix structure
    * @return     The function returns either
    * <code>ARM_MATH_SIZE_MISMATCH</code> or <code>ARM_MATH_SUCCESS</code> based on the outcome of size checking.
@@ -1615,7 +1615,7 @@ extern "C"
    * @brief  Q31 matrix initialization.
    * @param[in,out] *S             points to an instance of the floating-point matrix structure.
    * @param[in]     nRows          number of rows in the matrix.
-   * @param[in]     nColumns      he matrix. columns in the matrix.
+   * @param[in]     nColumns       number of columns in the matrix.
    * @param[in]     *pData	       points to the matrix data array.
    * @return        none
    */
@@ -1630,7 +1630,7 @@ extern "C"
    * @brief  Q15 matrix initialization.
    * @param[in,out] *S             points to an instance of the floating-point matrix structure.
    * @param[in]     nRows          number of rows in the matrix.
-   * @param[in]     nColumns      he matrix. columns in the matrix.
+   * @param[in]     nColumns       number of columns in the matrix.
    * @param[in]     *pData	       points to the matrix data array.
    * @return        none
    */
@@ -1645,7 +1645,7 @@ extern "C"
    * @brief  Floating-point matrix initialization.
    * @param[in,out] *S             points to an instance of the floating-point matrix structure.
    * @param[in]     nRows          number of rows in the matrix.
-   * @param[in]     nColumns      he matrix. columns in the matrix.
+   * @param[in]     nColumns       number of columns in the matrix.
    * @param[in]     *pData	       points to the matrix data array.
    * @return        none
    */
@@ -1783,7 +1783,7 @@ extern "C"
   typedef struct
   {
     uint16_t numRows;	/**< number of rows in the data table. */
-    uint16_t numCols;	/**<he matrix. columns in the data table. */
+    uint16_t numCols;	/**< number of columns in the data table. */
     float32_t *pData;	/**< points to the data table. */
   } arm_bilinear_interp_instance_f32;
 
@@ -1794,7 +1794,7 @@ extern "C"
   typedef struct
   {
     uint16_t numRows;	/**< number of rows in the data table. */
-    uint16_t numCols;	/**<he matrix. columns in the data table. */
+    uint16_t numCols;	/**< number of columns in the data table. */
     q31_t *pData;	/**< points to the data table. */
   } arm_bilinear_interp_instance_q31;
 
@@ -1805,7 +1805,7 @@ extern "C"
   typedef struct
   {
     uint16_t numRows;	/**< number of rows in the data table. */
-    uint16_t numCols;	/**<he matrix. columns in the data table. */
+    uint16_t numCols;	/**< number of columns in the data table. */
     q15_t *pData;	/**< points to the data table. */
   } arm_bilinear_interp_instance_q15;
 
@@ -1816,7 +1816,7 @@ extern "C"
   typedef struct
   {
     uint16_t numRows; 	/**< number of rows in the data table. */
-    uint16_t numCols;	/**<he matrix. columns in the data table. */
+    uint16_t numCols;	/**< number of columns in the data table. */
     q7_t *pData;		/**< points to the data table. */
   } arm_bilinear_interp_instance_q7;
 

@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -69,27 +74,27 @@
  * defined and/or created within this file:
  *
  * "Fast Interrupt Test" - A high frequency periodic interrupt is generated
- * using a free running timer to demonstrate the use of the 
- * configKERNEL_INTERRUPT_PRIORITY configuration constant.  The interrupt 
+ * using a free running timer to demonstrate the use of the
+ * configKERNEL_INTERRUPT_PRIORITY configuration constant.  The interrupt
  * service routine measures the number of processor clocks that occur between
- * each interrupt - and in so doing measures the jitter in the interrupt 
- * timing.  The maximum measured jitter time is latched in the usMaxJitter 
- * variable, and displayed on the LCD by the 'Check' as described below.  
- * The fast interrupt is configured and handled in the timer_test.c source 
+ * each interrupt - and in so doing measures the jitter in the interrupt
+ * timing.  The maximum measured jitter time is latched in the usMaxJitter
+ * variable, and displayed on the LCD by the 'Check' as described below.
+ * The fast interrupt is configured and handled in the timer_test.c source
  * file.
  *
  * "LCD" task - the LCD task is a 'gatekeeper' task.  It is the only task that
  * is permitted to access the LCD directly.  Other tasks wishing to write a
- * message to the LCD send the message on a queue to the LCD task instead of 
- * accessing the LCD themselves.  The LCD task just blocks on the queue waiting 
+ * message to the LCD send the message on a queue to the LCD task instead of
+ * accessing the LCD themselves.  The LCD task just blocks on the queue waiting
  * for messages - waking and displaying the messages as they arrive.  The LCD
- * task is defined in lcd.c.  
- * 
- * "Check" task -  This only executes every three seconds but has the highest 
- * priority so is guaranteed to get processor time.  Its main function is to 
+ * task is defined in lcd.c.
+ *
+ * "Check" task -  This only executes every three seconds but has the highest
+ * priority so is guaranteed to get processor time.  Its main function is to
  * check that all the standard demo tasks are still operational.  Should any
  * unexpected behaviour within a demo task be discovered the 'check' task will
- * write "FAIL #n" to the LCD (via the LCD task).  If all the demo tasks are 
+ * write "FAIL #n" to the LCD (via the LCD task).  If all the demo tasks are
  * executing with their expected behaviour then the check task writes the max
  * jitter time to the LCD (again via the LCD task), as described above.
  */
@@ -122,7 +127,7 @@
 #define mainCHECK_TAKS_STACK_SIZE			( configMINIMAL_STACK_SIZE * 2 )
 
 /* The execution period of the check task. */
-#define mainCHECK_TASK_PERIOD				( ( portTickType ) 3000 / portTICK_RATE_MS )
+#define mainCHECK_TASK_PERIOD				( ( TickType_t ) 3000 / portTICK_PERIOD_MS )
 
 /* The number of flash co-routines to create. */
 #define mainNUM_FLASH_COROUTINES			( 5 )
@@ -163,7 +168,7 @@ static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/
 
 /* The queue used to send messages to the LCD task. */
-static xQueueHandle xLCDQueue;
+static QueueHandle_t xLCDQueue;
 
 /*-----------------------------------------------------------*/
 
@@ -176,14 +181,14 @@ int main( void )
 	prvSetupHardware();
 
 	/* Create the standard demo tasks. */
-	vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );	
+	vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
 	vStartIntegerMathTasks( tskIDLE_PRIORITY );
 	vStartFlashCoRoutines( mainNUM_FLASH_COROUTINES );
 	vAltStartComTestTasks( mainCOM_TEST_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
 	vCreateBlockTimeTasks();
 
 	/* Create the test tasks defined within this file. */
-	xTaskCreate( vCheckTask, ( signed char * ) "Check", mainCHECK_TAKS_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
+	xTaskCreate( vCheckTask, "Check", mainCHECK_TAKS_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
 
 	/* Start the task that will control the LCD.  This returns the handle
 	to the queue used to write text out to the task. */
@@ -210,7 +215,7 @@ static void prvSetupHardware( void )
 static void vCheckTask( void *pvParameters )
 {
 /* Used to wake the task at the correct frequency. */
-portTickType xLastExecutionTime; 
+TickType_t xLastExecutionTime;
 
 /* The maximum jitter time measured by the fast interrupt test. */
 extern unsigned short usMaxJitter ;
@@ -243,7 +248,7 @@ unsigned short usErrorDetected = pdFALSE;
 			usErrorDetected = pdTRUE;
 			sprintf( cStringBuffer, "FAIL #1" );
 		}
-	
+
 		if( xAreComTestTasksStillRunning() != pdTRUE )
 		{
 			usErrorDetected = pdTRUE;

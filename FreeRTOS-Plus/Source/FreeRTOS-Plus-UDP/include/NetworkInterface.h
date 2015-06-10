@@ -1,5 +1,6 @@
 /*
- * FreeRTOS+UDP V1.0.0 (C) 2013 Real Time Engineers ltd.
+ * FreeRTOS+UDP V1.0.4 (C) 2014 Real Time Engineers ltd.
+ * All rights reserved
  *
  * This file is part of the FreeRTOS+UDP distribution.  The FreeRTOS+UDP license
  * terms are different to the FreeRTOS license terms.
@@ -43,8 +44,8 @@
 #define NETWORK_INTERFACE_H
 
 /* NOTE PUBLIC API FUNCTIONS. */
-portBASE_TYPE xNetworkInterfaceInitialise( void );
-portBASE_TYPE xNetworkInterfaceOutput( xNetworkBufferDescriptor_t * const pxNetworkBuffer );
+BaseType_t xNetworkInterfaceInitialise( void );
+BaseType_t xNetworkInterfaceOutput( xNetworkBufferDescriptor_t * const pxNetworkBuffer );
 void vNetworkInterfaceAllocateRAMToBuffers( xNetworkBufferDescriptor_t pxNetworkBuffers[ ipconfigNUM_NETWORK_BUFFERS ] );
 
 #endif /* NETWORK_INTERFACE_H */

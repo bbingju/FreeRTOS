@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -85,7 +90,7 @@
 Changes from V2.0.0
 
 	+ Delay periods are now specified using variables and constants of
-	  portTickType rather than unsigned long.
+	  TickType_t rather than unsigned long.
 */
 
 #include <stdlib.h>
@@ -118,7 +123,7 @@ static const unsigned portBASE_TYPE uxMaxNumberOfExtraTasksRunning = 5;
 
 /* Used to store a handle to the tasks that should be killed by a suicidal task, 
 before it kills itself. */
-xTaskHandle xCreatedTask1, xCreatedTask2;
+TaskHandle_t xCreatedTask1, xCreatedTask2;
 
 /*-----------------------------------------------------------*/
 
@@ -142,15 +147,15 @@ unsigned portBASE_TYPE *puxPriority;
 static void vSuicidalTask( void *pvParameters )
 {
 portDOUBLE d1, d2;
-xTaskHandle xTaskToKill;
-const portTickType xDelay = ( portTickType ) 500 / portTICK_RATE_MS;
+TaskHandle_t xTaskToKill;
+const TickType_t xDelay = ( TickType_t ) 500 / portTICK_PERIOD_MS;
 
 	if( pvParameters != NULL )
 	{
 		/* This task is periodically created four times.  Tow created tasks are 
 		passed a handle to the other task so it can kill it before killing itself.  
 		The other task is passed in null. */
-		xTaskToKill = *( xTaskHandle* )pvParameters;
+		xTaskToKill = *( TaskHandle_t* )pvParameters;
 	}
 	else
 	{
@@ -168,7 +173,7 @@ const portTickType xDelay = ( portTickType ) 500 / portTICK_RATE_MS;
 		if( xTaskToKill != NULL )
 		{
 			/* Make sure the other task has a go before we delete it. */
-			vTaskDelay( ( portTickType ) 0 );
+			vTaskDelay( ( TickType_t ) 0 );
 			/* Kill the other task that was created by vCreateTasks(). */
 			vTaskDelete( xTaskToKill );
 			/* Kill ourselves. */
@@ -180,7 +185,7 @@ const portTickType xDelay = ( portTickType ) 500 / portTICK_RATE_MS;
 
 static void vCreateTasks( void *pvParameters )
 {
-const portTickType xDelay = ( portTickType ) 1000 / portTICK_RATE_MS;
+const TickType_t xDelay = ( TickType_t ) 1000 / portTICK_PERIOD_MS;
 unsigned portBASE_TYPE uxPriority;
 const char * const pcTaskStartMsg = "Create task started.\r\n";
 

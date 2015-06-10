@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -65,7 +70,7 @@
 
 /******************************************************************************
  *
- * See the following web page for essential TwoEchoClient.c usage and 
+ * See the following web page for essential TwoEchoClient.c usage and
  * configuration details:
  * http://www.FreeRTOS.org/FreeRTOS-Plus/FreeRTOS_Plus_UDP/Embedded_Ethernet_Examples/Common_Echo_Clients.shtml
  *
@@ -86,18 +91,13 @@
 #include "FreeRTOS_Sockets.h"
 
 /* Small delay used between attempts to obtain a zero copy buffer. */
-#define echoTINY_DELAY	( ( portTickType ) 2 )
+#define echoTINY_DELAY	( ( TickType_t ) 2 )
 
 /* The echo tasks create a socket, send out a number of echo requests
 (listening for each echo reply), then close the socket again before
 starting over.  This delay is used between each iteration to ensure the
-network does not get too congested.  The delay is shorter when the Windows
-simulator is used because simulated time is slower than real time. */
-#ifdef _WINDOWS_
-	#define echoLOOP_DELAY	( ( portTickType ) 10 / portTICK_RATE_MS )
-#else
-	#define echoLOOP_DELAY	( ( portTickType ) 150 / portTICK_RATE_MS )
-#endif /* _WINDOWS_ */
+network does not get too congested. */
+#define echoLOOP_DELAY	( ( TickType_t ) 250 / portTICK_RATE_MS )
 
 #if ipconfigINCLUDE_EXAMPLE_FREERTOS_PLUS_TRACE_CALLS == 1
 	/* When the trace recorder code is included user events are generated to
@@ -129,30 +129,30 @@ static void prvZeroCopyEchoClientTask( void *pvParameters );
 /* The receive timeout is set shorter when the windows simulator is used
 because simulated time is slower than real time. */
 #ifdef _WINDOWS_
-	const portTickType xReceiveTimeOut = 50 / portTICK_RATE_MS;
+	const TickType_t xReceiveTimeOut = 50 / portTICK_RATE_MS;
 #else
-	const portTickType xReceiveTimeOut = 500 / portTICK_RATE_MS;
+	const TickType_t xReceiveTimeOut = 500 / portTICK_RATE_MS;
 #endif
 
 /*-----------------------------------------------------------*/
 
-void vStartEchoClientTasks( uint16_t usTaskStackSize, unsigned portBASE_TYPE uxTaskPriority )
+void vStartEchoClientTasks( uint16_t usTaskStackSize, UBaseType_t uxTaskPriority )
 {
 	/* Create the echo client task that does not use the zero copy interface. */
-	xTaskCreate( 	prvEchoClientTask,						/* The function that implements the task. */
-					( const signed char * const ) "Echo0",	/* Just a text name for the task to aid debugging. */
-					usTaskStackSize,						/* The stack size is defined in FreeRTOSIPConfig.h. */
-					NULL,									/* The task parameter, not used in this case. */
-					uxTaskPriority,							/* The priority assigned to the task is defined in FreeRTOSConfig.h. */
-					NULL );									/* The task handle is not used. */
+	xTaskCreate( 	prvEchoClientTask,	/* The function that implements the task. */
+					"Echo0",			/* Just a text name for the task to aid debugging. */
+					usTaskStackSize,	/* The stack size is defined in FreeRTOSIPConfig.h. */
+					NULL,				/* The task parameter, not used in this case. */
+					uxTaskPriority,		/* The priority assigned to the task is defined in FreeRTOSConfig.h. */
+					NULL );				/* The task handle is not used. */
 
 	/* Create the echo client task that does use the zero copy interface. */
-	xTaskCreate( 	prvZeroCopyEchoClientTask,				/* The function that implements the task. */
-					( const signed char * const ) "Echo1",	/* Just a text name for the task to aid debugging. */
-					usTaskStackSize,						/* The stack size is defined in FreeRTOSIPConfig.h. */
-					NULL,									/* The task parameter, not used in this case. */
-					uxTaskPriority,							/* The priority assigned to the task is defined in FreeRTOSConfig.h. */
-					NULL );									/* The task handle is not used. */
+	xTaskCreate( 	prvZeroCopyEchoClientTask,	/* The function that implements the task. */
+					"Echo1",					/* Just a text name for the task to aid debugging. */
+					usTaskStackSize,			/* The stack size is defined in FreeRTOSIPConfig.h. */
+					NULL,						/* The task parameter, not used in this case. */
+					uxTaskPriority,				/* The priority assigned to the task is defined in FreeRTOSConfig.h. */
+					NULL );						/* The task handle is not used. */
 }
 /*-----------------------------------------------------------*/
 
@@ -160,7 +160,7 @@ static void prvEchoClientTask( void *pvParameters )
 {
 xSocket_t xSocket;
 struct freertos_sockaddr xEchoServerAddress;
-int8_t cTxString[ 25 ], cRxString[ 25 ]; /* Make sure the stack is large enough to hold these.  Turn on stack overflow checking during debug to be sure. */
+char cTxString[ 25 ], cRxString[ 25 ]; /* Make sure the stack is large enough to hold these.  Turn on stack overflow checking during debug to be sure. */
 int32_t lLoopCount = 0UL;
 const int32_t lMaxLoopCount = 50;
 volatile uint32_t ulRxCount = 0UL, ulTxCount = 0UL;
@@ -192,7 +192,7 @@ uint32_t xAddressLength = sizeof( xEchoServerAddress );
 		for( lLoopCount = 0; lLoopCount < lMaxLoopCount; lLoopCount++ )
 		{
 			/* Create the string that is sent to the echo server. */
-			sprintf( ( char * ) cTxString, "Message number %u\r\n", ulTxCount );
+			sprintf( cTxString, "Message number %u\r\n", ( unsigned int ) ulTxCount );
 
 			/* Send the string to the socket.  ulFlags is set to 0, so the zero
 			copy interface is not used.  That means the data from cTxString is
@@ -201,7 +201,7 @@ uint32_t xAddressLength = sizeof( xEchoServerAddress );
 			to ensure the NULL string terminator is sent as part of the message. */
 			FreeRTOS_sendto( xSocket,				/* The socket being sent to. */
 							( void * ) cTxString,	/* The data being sent. */
-							strlen( ( const char * ) cTxString ) + 1, /* The length of the data being sent. */
+							strlen( cTxString ) + 1,/* The length of the data being sent. */
 							0,						/* ulFlags with the FREERTOS_ZERO_COPY bit clear. */
 							&xEchoServerAddress,	/* The destination address. */
 							sizeof( xEchoServerAddress ) );
@@ -227,7 +227,7 @@ uint32_t xAddressLength = sizeof( xEchoServerAddress );
 								&xAddressLength );
 
 			/* Compare the transmitted string to the received string. */
-			if( strcmp( ( char * ) cRxString, ( char * ) cTxString ) == 0 )
+			if( strcmp( cRxString, cTxString ) == 0 )
 			{
 				/* The echo reply was received without error. */
 				ulRxCount++;
@@ -248,7 +248,7 @@ static void prvZeroCopyEchoClientTask( void *pvParameters )
 {
 xSocket_t xSocket;
 struct freertos_sockaddr xEchoServerAddress;
-static int8_t cTxString[ 40 ];
+static char cTxString[ 40 ];
 int32_t lLoopCount = 0UL;
 volatile uint32_t ulRxCount = 0UL, ulTxCount = 0UL;
 uint32_t xAddressLength = sizeof( xEchoServerAddress );
@@ -256,9 +256,9 @@ int32_t lReturned;
 uint8_t *pucUDPPayloadBuffer;
 
 const int32_t lMaxLoopCount = 50;
-const uint8_t * const pucStringToSend = ( const uint8_t * const ) "Zero copy message number";
+const char * const pcStringToSend = "Zero copy message number";
 /* The buffer is large enough to hold the string, a number, and the string terminator. */
-const size_t xBufferLength = strlen( ( char * ) pucStringToSend ) + 15;
+const size_t xBufferLength = strlen( pcStringToSend ) + 15;
 
 	#if ipconfigINCLUDE_EXAMPLE_FREERTOS_PLUS_TRACE_CALLS == 1
 	{
@@ -313,11 +313,11 @@ const size_t xBufferLength = strlen( ( char * ) pucStringToSend ) + 15;
 				/* A buffer was successfully obtained.  Create the string that is
 				sent to the echo server.  Note the string is written directly
 				into the buffer obtained from the IP stack. */
-				sprintf( ( char * ) pucUDPPayloadBuffer, "%s %u\r\n", ( const char * ) "Zero copy message number", ulTxCount );
+				sprintf( ( char * ) pucUDPPayloadBuffer, "%s %u\r\n", "Zero copy message number", ( unsigned int ) ulTxCount );
 
 				/* Also copy the string into a local buffer so it can be compared
 				with the string that is later received back from the echo server. */
-				strcpy( ( char * ) cTxString, ( char * ) pucUDPPayloadBuffer );
+				strcpy( cTxString, ( char * ) pucUDPPayloadBuffer );
 
 				/* Pass the buffer into the send function.  ulFlags has the
 				FREERTOS_ZERO_COPY bit set so the IP stack will take control of
@@ -325,7 +325,7 @@ const size_t xBufferLength = strlen( ( char * ) pucStringToSend ) + 15;
 				echoMARK_SEND_IN_TRACE_BUFFER( xZeroCopySendEvent );
 				lReturned = FreeRTOS_sendto( 	xSocket,					/* The socket being sent to. */
 												( void * ) pucUDPPayloadBuffer,	/* The buffer being passed into the IP stack. */
-												strlen( ( const char * ) cTxString ) + 1, /* The length of the data being sent.  Plus 1 to ensure the null terminator is part of the data. */
+												strlen( cTxString ) + 1, 	/* The length of the data being sent.  Plus 1 to ensure the null terminator is part of the data. */
 												FREERTOS_ZERO_COPY,			/* ulFlags with the zero copy bit is set. */
 												&xEchoServerAddress,		/* Where the data is being sent. */
 												sizeof( xEchoServerAddress ) );
@@ -376,7 +376,7 @@ const size_t xBufferLength = strlen( ( char * ) pucStringToSend ) + 15;
 				{
 					/* Compare the string sent to the echo server with the string
 					received back from the echo server. */
-					if( strcmp( ( char * ) pucUDPPayloadBuffer, ( char * ) cTxString ) == 0 )
+					if( strcmp( ( char * ) pucUDPPayloadBuffer, cTxString ) == 0 )
 					{
 						/* The strings matched. */
 						ulRxCount++;

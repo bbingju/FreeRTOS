@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -238,7 +243,7 @@ volatile unsigned short usRegTest1Counter = 0, usRegTest2Counter = 0;
 
 /* The handle of the queue used to send messages from tasks and interrupts to
 the LCD task. */
-static xQueueHandle xLCDQueue = NULL;
+static QueueHandle_t xLCDQueue = NULL;
 
 /* The definition of each message sent from tasks and interrupts to the LCD
 task. */
@@ -250,9 +255,9 @@ typedef struct
 
 /*-----------------------------------------------------------*/
 
-/* The linker script can be used to test the FreeRTOS ports use of 20bit 
-addresses by locating all code in high memory.  The following pragma ensures 
-that main remains in low memory when that is done.  The ISR_CODE segment is used 
+/* The linker script can be used to test the FreeRTOS ports use of 20bit
+addresses by locating all code in high memory.  The following pragma ensures
+that main remains in low memory when that is done.  The ISR_CODE segment is used
 for convenience as ISR functions are always placed in low memory. */
 #pragma location="ISR_CODE"
 void main( void )
@@ -277,22 +282,22 @@ void main( void )
 		vAltStartComTestTasks( mainCOM_TEST_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
 		vStartDynamicPriorityTasks();
 		vStartGenericQueueTasks( mainGENERIC_QUEUE_TEST_PRIORITY );
-		
+
 		/* Create the LCD, button poll and register test tasks, as described at
 		the top	of this	file. */
-		xTaskCreate( prvLCDTask, ( signed char * ) "LCD", configMINIMAL_STACK_SIZE * 2, mainTASK_PARAMETER_CHECK_VALUE, mainLCD_TASK_PRIORITY, NULL );
-		xTaskCreate( prvButtonPollTask, ( signed char * ) "BPoll", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
-		xTaskCreate( vRegTest1Task, ( signed char * ) "Reg1", configMINIMAL_STACK_SIZE, NULL, 0, NULL );
-		xTaskCreate( vRegTest2Task, ( signed char * ) "Reg2", configMINIMAL_STACK_SIZE, NULL, 0, NULL );
+		xTaskCreate( prvLCDTask, "LCD", configMINIMAL_STACK_SIZE * 2, mainTASK_PARAMETER_CHECK_VALUE, mainLCD_TASK_PRIORITY, NULL );
+		xTaskCreate( prvButtonPollTask, "BPoll", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
+		xTaskCreate( vRegTest1Task, "Reg1", configMINIMAL_STACK_SIZE, NULL, 0, NULL );
+		xTaskCreate( vRegTest2Task, "Reg2", configMINIMAL_STACK_SIZE, NULL, 0, NULL );
 
 		/* Start the scheduler. */
 		vTaskStartScheduler();
 	}
-	
+
 	/* If all is well then this line will never be reached.  If it is reached
 	then it is likely that there was insufficient (FreeRTOS) heap memory space
 	to create the idle task.  This may have been trapped by the malloc() failed
-	hook function, if one is configured. */	
+	hook function, if one is configured. */
 	for( ;; );
 }
 /*-----------------------------------------------------------*/
@@ -312,19 +317,19 @@ unsigned char ucLine = 1;
 	/* This function is the only function that uses printf().  If printf() is
 	used from any other function then some sort of mutual exclusion on stdout
 	will be necessary.
-	
+
 	This is also the only function that is permitted to access the LCD.
-	
+
 	First print out the number of bytes that remain in the FreeRTOS heap.  This
 	can be viewed in the terminal IO window within the IAR Embedded Workbench. */
 	printf( "%d bytes of heap space remain unallocated\n", ( int ) xPortGetFreeHeapSize() );
-	
+
 	/* Just as a test of the port, and for no functional reason, check the task
 	parameter contains its expected value. */
 	if( pvParameters != mainTASK_PARAMETER_CHECK_VALUE )
 	{
 		halLcdPrintLine( "Invalid parameter", ucLine,  OVERWRITE_TEXT );
-		ucLine++;		
+		ucLine++;
 	}
 
 	for( ;; )
@@ -342,7 +347,7 @@ unsigned char ucLine = 1;
 			halLcdClearScreen();
 			ucLine = 0;
 		}
-		
+
 		/* What is this message?  What does it contain? */
 		switch( xReceivedMessage.cMessageID )
 		{
@@ -361,9 +366,9 @@ unsigned char ucLine = 1;
 												the terminal IO window in the IAR
 												embedded workbench. */
 												printf( "\nTask\t     Abs Time\t     %%Time\n*****************************************" );
-												vTaskGetRunTimeStats( ( signed char * ) cBuffer );
+												vTaskGetRunTimeStats( cBuffer );
 												printf( cBuffer );
-												
+
 												/* Also print out a message to
 												the LCD - in this case the
 												pointer to the string to print
@@ -374,7 +379,7 @@ unsigned char ucLine = 1;
 												technique. */
 												sprintf( cBuffer, "%s", ( char * ) xReceivedMessage.ulMessageValue );
 												break;
-												
+
 			case mainMESSAGE_STATUS			:	/* The tick interrupt hook
 												function has just informed this
 												task of the system status.
@@ -382,11 +387,11 @@ unsigned char ucLine = 1;
 												with the status value. */
 												prvGenerateStatusMessage( cBuffer, xReceivedMessage.ulMessageValue );
 												break;
-												
+
 			default							:	sprintf( cBuffer, "Unknown message" );
 												break;
 		}
-		
+
 		/* Output the message that was placed into the cBuffer array within the
 		switch statement above, then move onto the next line ready for the next
 		message to arrive on the queue. */
@@ -429,13 +434,13 @@ xQueueMessage xMessage;
 	{
 		/* Check the button state. */
 		ucState = ( halButtonsPressed() & BUTTON_UP );
-		
+
 		if( ucState != 0 )
 		{
 			/* The button was pressed. */
 			ucState = pdTRUE;
 		}
-		
+
 		if( ucState != ucLastState )
 		{
 			/* The state has changed, send a message to the LCD task. */
@@ -444,10 +449,10 @@ xQueueMessage xMessage;
 			ucLastState = ucState;
 			xQueueSend( xLCDQueue, &xMessage, portMAX_DELAY );
 		}
-		
+
 		/* Block for 10 milliseconds so this task does not utilise all the CPU
 		time and debouncing of the button is not necessary. */
-		vTaskDelay( 10 / portTICK_RATE_MS );
+		vTaskDelay( 10 / portTICK_PERIOD_MS );
 	}
 }
 /*-----------------------------------------------------------*/
@@ -471,7 +476,7 @@ static void prvSetupHardware( void )
 	halLcdInit();
 	halLcdSetContrast( 100 );
 	halLcdClearScreen();
-	
+
 	halLcdPrintLine( " www.FreeRTOS.org", 0,  OVERWRITE_TEXT );
 }
 /*-----------------------------------------------------------*/
@@ -480,7 +485,7 @@ void vApplicationTickHook( void )
 {
 static unsigned short usLastRegTest1Counter = 0, usLastRegTest2Counter = 0;
 static unsigned long ulCounter = 0;
-static const unsigned long ulCheckFrequency = 5000UL / portTICK_RATE_MS;
+static const unsigned long ulCheckFrequency = 5000UL / portTICK_PERIOD_MS;
 portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
 /* Define the status message that is sent to the LCD task.  By default the
@@ -506,11 +511,11 @@ static xQueueMessage xStatusMessage = { mainMESSAGE_STATUS, pdPASS };
 		{
 			xStatusMessage.ulMessageValue = mainERROR_DYNAMIC_TASKS;
 		}
-		
+
 		if( xAreGenericQueueTasksStillRunning() != pdPASS )
 		{
 			xStatusMessage.ulMessageValue = mainERROR_GEN_QUEUE_TEST;
-		}			
+		}
 
 		/* Check the reg test tasks are still cycling.  They will stop
 		incrementing their loop counters if they encounter an error. */
@@ -526,7 +531,7 @@ static xQueueMessage xStatusMessage = { mainMESSAGE_STATUS, pdPASS };
 
 		usLastRegTest1Counter = usRegTest1Counter;
 		usLastRegTest2Counter = usRegTest2Counter;
-		
+
 		/* As this is the tick hook the lHigherPriorityTaskWoken parameter is not
 		needed (a context switch is going to be performed anyway), but it must
 		still be provided. */
@@ -563,7 +568,7 @@ portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	xQueueSendFromISR( xLCDQueue, &xMessage, &xHigherPriorityTaskWoken );
 
 	P2IFG = 0;
-	
+
 	/* If writing to xLCDQueue caused a task to unblock, and the unblocked task
 	has a priority equal to or above the task that this interrupt interrupted,
 	then lHigherPriorityTaskWoken will have been set to pdTRUE internally within
@@ -625,11 +630,11 @@ void vApplicationMallocFailedHook( void )
 }
 /*-----------------------------------------------------------*/
 
-void vApplicationStackOverflowHook( xTaskHandle pxTask, signed char *pcTaskName )
+void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 {
 	( void ) pxTask;
 	( void ) pcTaskName;
-	
+
 	/* Run time stack overflow checking is performed if
 	configconfigCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
 	function is called if a stack overflow is detected. */

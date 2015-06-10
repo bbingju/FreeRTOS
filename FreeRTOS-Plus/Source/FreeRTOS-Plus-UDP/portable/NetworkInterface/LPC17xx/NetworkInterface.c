@@ -1,5 +1,6 @@
 /*
- * FreeRTOS+UDP V1.0.0 (C) 2013 Real Time Engineers ltd.
+ * FreeRTOS+UDP V1.0.4 (C) 2014 Real Time Engineers ltd.
+ * All rights reserved
  *
  * This file is part of the FreeRTOS+UDP distribution.  The FreeRTOS+UDP license
  * terms are different to the FreeRTOS license terms.
@@ -53,6 +54,7 @@
 
 /* FreeRTOS+UDP includes. */
 #include "FreeRTOS_UDP_IP.h"
+#include "FreeRTOS_IP_Private.h"
 #include "FreeRTOS_Sockets.h"
 #include "NetworkBufferManagement.h"
 
@@ -73,7 +75,7 @@
 task performing the transmit will block for niTX_BUFFER_FREE_WAIT
 milliseconds.  It will do this a maximum of niMAX_TX_ATTEMPTS before giving
 up. */
-#define niTX_BUFFER_FREE_WAIT	( ( portTickType ) 2UL / portTICK_RATE_MS )
+#define niTX_BUFFER_FREE_WAIT	( ( TickType_t ) 2UL / portTICK_RATE_MS )
 #define niMAX_TX_ATTEMPTS		( 5 )
 
 /* The length of the queue used to send interrupt status words from the
@@ -97,11 +99,11 @@ interrupt is received. */
 static xSemaphoreHandle xEMACRxEventSemaphore = NULL;
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xNetworkInterfaceInitialise( void )
+BaseType_t xNetworkInterfaceInitialise( void )
 {
 EMAC_CFG_Type Emac_Config;
 PINSEL_CFG_Type xPinConfig;
-portBASE_TYPE xStatus, xReturn;
+BaseType_t xStatus, xReturn;
 extern uint8_t ucMACAddress[ 6 ];
 
 	/* Enable Ethernet Pins */
@@ -120,7 +122,7 @@ extern uint8_t ucMACAddress[ 6 ];
 
 		/* The handler task is created at the highest possible priority to
 		ensure the interrupt handler can return directly to it. */
-		xTaskCreate( prvEMACHandlerTask, ( const signed char * const ) "EMAC", configMINIMAL_STACK_SIZE, NULL, configMAX_PRIORITIES - 1, NULL );
+		xTaskCreate( prvEMACHandlerTask, "EMAC", configMINIMAL_STACK_SIZE, NULL, configMAX_PRIORITIES - 1, NULL );
 
 		/* Enable the interrupt and set its priority to the minimum
 		interrupt priority.  */
@@ -140,9 +142,9 @@ extern uint8_t ucMACAddress[ 6 ];
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xNetworkInterfaceOutput( xNetworkBufferDescriptor_t * const pxNetworkBuffer )
+BaseType_t xNetworkInterfaceOutput( xNetworkBufferDescriptor_t * const pxNetworkBuffer )
 {
-portBASE_TYPE xReturn = pdFAIL;
+BaseType_t xReturn = pdFAIL;
 int32_t x;
 extern void EMAC_StartTransmitNextBuffer( uint32_t ulLength );
 extern void EMAC_SetNextPacketToSend( uint8_t * pucBuffer );
@@ -158,10 +160,10 @@ extern void EMAC_SetNextPacketToSend( uint8_t * pucBuffer );
 			{
 				/* Assign the buffer to the Tx descriptor that is now known to
 				be free. */
-				EMAC_SetNextPacketToSend( pxNetworkBuffer->pucBuffer );
+				EMAC_SetNextPacketToSend( pxNetworkBuffer->pucEthernetBuffer );
 
 				/* The EMAC now owns the buffer. */
-				pxNetworkBuffer->pucBuffer = NULL;
+				pxNetworkBuffer->pucEthernetBuffer = NULL;
 
 				/* Initiate the Tx. */
 				EMAC_StartTransmitNextBuffer( pxNetworkBuffer->xDataLength );
@@ -250,17 +252,17 @@ extern uint8_t *EMAC_NextPacketToRead( void );
 				stack.  No storage is required as the network buffer
 				will point directly to the buffer that already holds
 				the	received data. */
-				pxNetworkBuffer = pxNetworkBufferGet( 0, ( portTickType ) 0 );
+				pxNetworkBuffer = pxNetworkBufferGet( 0, ( TickType_t ) 0 );
 
 				if( pxNetworkBuffer != NULL )
 				{
-					pxNetworkBuffer->pucBuffer = EMAC_NextPacketToRead();
+					pxNetworkBuffer->pucEthernetBuffer = EMAC_NextPacketToRead();
 					pxNetworkBuffer->xDataLength = xDataLength;
 					xRxEvent.pvData = ( void * ) pxNetworkBuffer;
 
 					/* Data was received and stored.  Send a message to the IP
 					task to let it know. */
-					if( xQueueSendToBack( xNetworkEventQueue, &xRxEvent, ( portTickType ) 0 ) == pdFALSE )
+					if( xQueueSendToBack( xNetworkEventQueue, &xRxEvent, ( TickType_t ) 0 ) == pdFALSE )
 					{
 						vNetworkBufferRelease( pxNetworkBuffer );
 						iptraceETHERNET_RX_EVENT_LOST();

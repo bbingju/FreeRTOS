@@ -1,54 +1,70 @@
 /*
-    FreeRTOS V7.1.0 - Copyright (C) 2011 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS tutorial books are available in pdf and paperback.        *
-     *    Complete, revised, and edited pdf reference manuals are also       *
-     *    available.                                                         *
-     *                                                                       *
-     *    Purchasing FreeRTOS documentation will not only help you, by       *
-     *    ensuring you get running as quickly as possible and with an        *
-     *    in-depth knowledge of how to use FreeRTOS, it will also help       *
-     *    the FreeRTOS project to continue with its mission of providing     *
-     *    professional grade, cross platform, de facto standard solutions    *
-     *    for microcontrollers - completely free of charge!                  *
-     *                                                                       *
-     *    >>> See http://www.FreeRTOS.org/Documentation for details. <<<     *
-     *                                                                       *
-     *    Thank you for using FreeRTOS, and thank you for your support!      *
-     *                                                                       *
-    ***************************************************************************
-
+    VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
 
     This file is part of the FreeRTOS distribution.
 
     FreeRTOS is free software; you can redistribute it and/or modify it under
     the terms of the GNU General Public License (version 2) as published by the
-    Free Software Foundation AND MODIFIED BY the FreeRTOS exception.
-    >>>NOTE<<< The modification to the GPL is included to allow you to
-    distribute a combined work that includes FreeRTOS without being obliged to
-    provide the source code for proprietary components outside of the FreeRTOS
-    kernel.  FreeRTOS is distributed in the hope that it will be useful, but
-    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-    more details. You should have received a copy of the GNU General Public
-    License and the FreeRTOS license exception along with FreeRTOS; if not it
-    can be viewed here: http://www.freertos.org/a00114.html and also obtained
-    by writing to Richard Barry, contact details for whom are available on the
-    FreeRTOS WEB site.
+    Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
+
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
+
+    FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
+    link: http://www.freertos.org/a00114.html
+
+    ***************************************************************************
+     *                                                                       *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
+     *                                                                       *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
+     *                                                                       *
+    ***************************************************************************
+
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
+
+    http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
+    including FreeRTOS+Trace - an indispensable productivity tool, a DOS
+    compatible FAT file system, and our tiny thread aware UDP/IP stack.
+
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
+
+    http://www.SafeRTOS.com - High Integrity Systems also provide a safety
+    engineered and independently SIL3 certified version for use in safety and
+    mission critical applications that require provable dependability.
 
     1 tab == 4 spaces!
-
-    http://www.FreeRTOS.org - Documentation, latest information, license and
-    contact details.
-
-    http://www.SafeRTOS.com - A version that is certified for use in safety
-    critical systems.
-
-    http://www.OpenRTOS.com - Commercial support, development, porting,
-    licensing and training services.
 */
 
 /* Standard includes. */
@@ -72,7 +88,7 @@
 #define cmdMAX_INPUT_SIZE		50
 
 /* The maximum time in ticks to wait for the UART access mutex. */
-#define cmdMAX_MUTEX_WAIT		( 200 / portTICK_RATE_MS )
+#define cmdMAX_MUTEX_WAIT		( 200 / portTICK_PERIOD_MS )
 
 /*-----------------------------------------------------------*/
 
@@ -84,9 +100,9 @@ static void prvUARTCommandConsoleTask( void *pvParameters );
 /*-----------------------------------------------------------*/
 
 /* Const messages output by the command console. */
-static const signed char * const pcWelcomeMessage = "FreeRTOS command server.\r\nType Help to view a list of registered commands.\r\n\r\n>";
-static const signed char * const pcEndOfOutputMessage = "\r\n[Press ENTER to execute the previous command again]\r\n>";
-static const signed char * const pcNewLine = "\r\n";
+static const char * const pcWelcomeMessage = "FreeRTOS command server.\r\nType Help to view a list of registered commands.\r\n\r\n>";
+static const char * const pcEndOfOutputMessage = "\r\n[Press ENTER to execute the previous command again]\r\n>";
+static const char * const pcNewLine = "\r\n";
 
 /*-----------------------------------------------------------*/
 
@@ -104,8 +120,8 @@ void vUARTCommandConsoleStart( uint16_t usStackSize, unsigned portBASE_TYPE uxPr
 
 static void prvUARTCommandConsoleTask( void *pvParameters )
 {
-int8_t cRxedChar, cInputIndex = 0, *pcOutputString;
-static int8_t cInputString[ cmdMAX_INPUT_SIZE ], cLastInputString[ cmdMAX_INPUT_SIZE ];
+char cRxedChar, cInputIndex = 0, *pcOutputString;
+static char cInputString[ cmdMAX_INPUT_SIZE ], cLastInputString[ cmdMAX_INPUT_SIZE ];
 portBASE_TYPE xReturned;
 
 	( void ) pvParameters;
@@ -116,12 +132,12 @@ portBASE_TYPE xReturned;
 	pcOutputString = FreeRTOS_CLIGetOutputBuffer();
 
 	/* Send the welcome message. */
-	vSerialPutString( NULL, pcWelcomeMessage, strlen( ( char * ) pcWelcomeMessage ) );
+	vSerialPutString( NULL, ( const signed char * ) pcWelcomeMessage, strlen( ( char * ) pcWelcomeMessage ) );
 
 	for( ;; )
 	{
 		/* Only interested in reading one character at a time. */
-		while( xSerialGetChar( NULL, &cRxedChar, portMAX_DELAY ) == pdFALSE );
+		while( xSerialGetChar( NULL, ( signed char * ) &cRxedChar, portMAX_DELAY ) == pdFALSE );
 
 		/* Echo the character back. */
 		xSerialPutChar( NULL, cRxedChar, portMAX_DELAY );
@@ -130,7 +146,7 @@ portBASE_TYPE xReturned;
 		if( cRxedChar == '\n' || cRxedChar == '\r' )
 		{
 			/* Just to space the output from the input. */
-			vSerialPutString( NULL, pcNewLine, strlen( ( char * ) pcNewLine ) );
+			vSerialPutString( NULL, ( const signed char * ) pcNewLine, strlen( ( char * ) pcNewLine ) );
 
 			/* See if the command is empty, indicating that the last command is
 			to be executed again. */
@@ -150,7 +166,7 @@ portBASE_TYPE xReturned;
 				xReturned = FreeRTOS_CLIProcessCommand( cInputString, pcOutputString, configCOMMAND_INT_MAX_OUTPUT_SIZE );
 
 				/* Write the generated string to the UART. */
-				vSerialPutString( NULL, pcOutputString, strlen( ( char * ) pcOutputString ) );
+				vSerialPutString( NULL, ( const signed char * ) pcOutputString, strlen( ( char * ) pcOutputString ) );
 
 			} while( xReturned != pdFALSE );
 
@@ -161,7 +177,7 @@ portBASE_TYPE xReturned;
 			strcpy( ( char * ) cLastInputString, ( char * ) cInputString );
 			cInputIndex = 0;
 			memset( cInputString, 0x00, cmdMAX_INPUT_SIZE );
-			vSerialPutString( NULL, pcEndOfOutputMessage, strlen( ( char * ) pcEndOfOutputMessage ) );
+			vSerialPutString( NULL, ( const signed char * ) pcEndOfOutputMessage, strlen( ( char * ) pcEndOfOutputMessage ) );
 		}
 		else
 		{

@@ -13,23 +13,10 @@
  *****************************************************************************/
 
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -37,37 +24,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -105,27 +110,32 @@ extern "C" {
 #define portDOUBLE      double
 #define portLONG        long
 #define portSHORT       short
-#define portSTACK_TYPE  unsigned portLONG
-#define portBASE_TYPE   portLONG
+#define portSTACK_TYPE  uint32_t
+#define portBASE_TYPE   long
 
-#define TASK_DELAY_MS(x)   ( (x)        /portTICK_RATE_MS )
-#define TASK_DELAY_S(x)    ( (x)*1000   /portTICK_RATE_MS )
-#define TASK_DELAY_MIN(x)  ( (x)*60*1000/portTICK_RATE_MS )
+typedef portSTACK_TYPE StackType_t;
+typedef long BaseType_t;
+typedef unsigned long UBaseType_t;
+
+
+#define TASK_DELAY_MS(x)   ( (x)        /portTICK_PERIOD_MS )
+#define TASK_DELAY_S(x)    ( (x)*1000   /portTICK_PERIOD_MS )
+#define TASK_DELAY_MIN(x)  ( (x)*60*1000/portTICK_PERIOD_MS )
 
 #define configTICK_TC_IRQ             ATPASTE2(AVR32_TC_IRQ, configTICK_TC_CHANNEL)
 
 #if( configUSE_16_BIT_TICKS == 1 )
-  typedef unsigned portSHORT portTickType;
-	#define portMAX_DELAY ( portTickType ) 0xffff
+  typedef uint16_t TickType_t;
+	#define portMAX_DELAY ( TickType_t ) 0xffff
 #else
-  typedef unsigned portLONG portTickType;
-	#define portMAX_DELAY ( portTickType ) 0xffffffff
+  typedef uint32_t TickType_t;
+	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
 #endif
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */
 #define portSTACK_GROWTH      ( -1 )
-#define portTICK_RATE_MS      ( ( portTickType ) 1000 / configTICK_RATE_HZ )
+#define portTICK_PERIOD_MS      ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT       4
 #define portNOP()             {__asm__ __volatile__ ("nop");}
 /*-----------------------------------------------------------*/
@@ -193,7 +203,7 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
  */
 #define portRESTORE_CONTEXT()																\
 {																							\
-  extern volatile unsigned portLONG ulCriticalNesting;										\
+  extern volatile uint32_t ulCriticalNesting;										\
   extern volatile void *volatile pxCurrentTCB;												\
 																							\
   __asm__ __volatile__ (																	\
@@ -299,7 +309,7 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
  */
 #define portSAVE_CONTEXT_OS_INT()																	\
 {																									\
-  extern volatile unsigned portLONG ulCriticalNesting;												\
+  extern volatile uint32_t ulCriticalNesting;												\
   extern volatile void *volatile pxCurrentTCB;														\
 																									\
   /* When we come here */																			\
@@ -347,7 +357,7 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
  */
 #define portRESTORE_CONTEXT_OS_INT()																\
 {																									\
-  extern volatile unsigned portLONG ulCriticalNesting;												\
+  extern volatile uint32_t ulCriticalNesting;												\
   extern volatile void *volatile pxCurrentTCB;														\
 																									\
   /* Check if INT0 or higher were being handled (case where the OS tick interrupted another */		\
@@ -411,7 +421,7 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
  */
 #define portSAVE_CONTEXT_SCALL()																	\
 {																									\
-  extern volatile unsigned portLONG ulCriticalNesting;												\
+  extern volatile uint32_t ulCriticalNesting;												\
   extern volatile void *volatile pxCurrentTCB;														\
 																									\
   /* Warning: the stack layout after SCALL doesn't match the one after an interrupt. */				\
@@ -474,7 +484,7 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
  */
 #define portRESTORE_CONTEXT_SCALL()																	\
 {																									\
-  extern volatile unsigned portLONG ulCriticalNesting;												\
+  extern volatile uint32_t ulCriticalNesting;												\
   extern volatile void *volatile pxCurrentTCB;														\
 																									\
   /* Restore all registers */																		\
@@ -566,7 +576,7 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
  */
 #define portENTER_SWITCHING_ISR()																	\
 {																									\
-  extern volatile unsigned portLONG ulCriticalNesting;												\
+  extern volatile uint32_t ulCriticalNesting;												\
   extern volatile void *volatile pxCurrentTCB;														\
 																									\
   /* When we come here */																			\
@@ -611,7 +621,7 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
  */
 #define portEXIT_SWITCHING_ISR()																	\
 {																									\
-  extern volatile unsigned portLONG ulCriticalNesting;												\
+  extern volatile uint32_t ulCriticalNesting;												\
   extern volatile void *volatile pxCurrentTCB;														\
 																									\
   __asm__ __volatile__ (																			\

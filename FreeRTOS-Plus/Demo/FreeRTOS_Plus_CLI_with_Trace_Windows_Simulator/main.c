@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -69,11 +74,12 @@
  * application.  It is provided as a convenient development and demonstration
  * test bed only.  This was tested using Windows XP on a dual core laptop.
  *
- * In this example, one simulated millisecond will take approximately 40ms to
- * execute, and the timing information in the FreeRTOS+Trace logs have no
- * meaningful units.  See the documentation page for the Windows simulator for
- * an explanation of the slow timing:
+ * Windows will not be running the FreeRTOS simulator threads continuously, so
+ * the timing information in the FreeRTOS+Trace logs have no meaningful units.
+ * See the documentation page for the Windows simulator for an explanation of
+ * the slow timing:
  * http://www.freertos.org/FreeRTOS-Windows-Simulator-Emulator-for-Visual-Studio-and-Eclipse-MingW.html
+ * - READ THE WEB DOCUMENTATION FOR THIS PORT FOR MORE INFORMATION ON USING IT -
  *
  * Documentation for this demo can be found on:
  * http://www.freertos.org/FreeRTOS-Plus/FreeRTOS_Plus_Trace/Free_RTOS_Plus_Trace_CLI_Example.shtml
@@ -123,9 +129,9 @@
 #define	mainQUEUE_SEND_TASK_PRIORITY		( tskIDLE_PRIORITY + 1 )
 #define mainUDP_CLI_TASK_PRIORITY			( tskIDLE_PRIORITY )
 
-/* The rate at which data is sent to the queue.  The (simulated) 50ms value is
+/* The rate at which data is sent to the queue.  The (simulated) 250ms value is
 converted to ticks using the portTICK_RATE_MS constant. */
-#define mainQUEUE_SEND_FREQUENCY_MS			( 50 / portTICK_RATE_MS )
+#define mainQUEUE_SEND_FREQUENCY_MS			( 250 / portTICK_RATE_MS )
 
 /* The number of items the queue can hold.  This is 1 as the receive task
 will remove items as they are added, meaning the send task should always find
@@ -182,17 +188,17 @@ const uint32_t ulLongTime_ms = 250UL;
 	/* Start the two tasks as described in the comments at the top of this
 	file. */
 	xTaskCreate( prvQueueReceiveTask,				/* The function that implements the task. */
-				( signed char * ) "Rx", 			/* The text name assigned to the task - for debug only as it is not used by the kernel. */
+				"Rx", 								/* The text name assigned to the task - for debug only as it is not used by the kernel. */
 				configMINIMAL_STACK_SIZE, 			/* The size of the stack to allocate to the task.  Not actually used as a stack in the Win32 simulator port. */
 				NULL,								/* The parameter passed to the task - not used in this example. */
 				mainQUEUE_RECEIVE_TASK_PRIORITY, 	/* The priority assigned to the task. */
 				NULL );								/* The task handle is not required, so NULL is passed. */
 
-	xTaskCreate( prvQueueSendTask, ( signed char * ) "TX", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
+	xTaskCreate( prvQueueSendTask, "TX", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
 
 	/* Create the task that handles the CLI on a UDP port.  The port number
 	is set using the configUDP_CLI_PORT_NUMBER setting in FreeRTOSConfig.h. */
-	xTaskCreate( vUDPCommandInterpreterTask, ( signed char * ) "CLI", configMINIMAL_STACK_SIZE, NULL, mainUDP_CLI_TASK_PRIORITY, NULL );
+	xTaskCreate( vUDPCommandInterpreterTask, "CLI", configMINIMAL_STACK_SIZE, NULL, mainUDP_CLI_TASK_PRIORITY, NULL );
 
 	/* Register commands with the FreeRTOS+CLI command interpreter. */
 	vRegisterCLICommands();
@@ -215,7 +221,7 @@ const uint32_t ulLongTime_ms = 250UL;
 
 static void prvQueueSendTask( void *pvParameters )
 {
-portTickType xNextWakeTime;
+TickType_t xNextWakeTime;
 const unsigned long ulValueToSend = 100UL;
 
 	/* Remove warning about unused parameters. */
@@ -291,10 +297,10 @@ const unsigned long ulLongSleep = 1000UL;
 
 void vApplicationTickHook( void )
 {
-	/* Write a user event to the trace log.  
+	/* Write a user event to the trace log.
 	Note tick events will not appear in the trace recording with regular period
 	because this project runs in a Windows simulator, and does not therefore
 	exhibit deterministic behaviour. */
-	vTraceUserEvent( xTickTraceUserEvent );					
+	vTraceUserEvent( xTickTraceUserEvent );
 }
 

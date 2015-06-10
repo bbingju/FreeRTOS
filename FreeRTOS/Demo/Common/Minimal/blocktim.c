@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -87,27 +92,27 @@
 
 /* Task behaviour. */
 #define bktQUEUE_LENGTH				( 5 )
-#define bktSHORT_WAIT				( ( ( portTickType ) 20 ) / portTICK_RATE_MS )
+#define bktSHORT_WAIT				( ( ( TickType_t ) 20 ) / portTICK_PERIOD_MS )
 #define bktPRIMARY_BLOCK_TIME		( 10 )
 #define bktALLOWABLE_MARGIN			( 15 )
 #define bktTIME_TO_BLOCK			( 175 )
-#define bktDONT_BLOCK				( ( portTickType ) 0 )
-#define bktRUN_INDICATOR			( ( unsigned portBASE_TYPE ) 0x55 )
+#define bktDONT_BLOCK				( ( TickType_t ) 0 )
+#define bktRUN_INDICATOR			( ( UBaseType_t ) 0x55 )
 
 /* The queue on which the tasks block. */
-static xQueueHandle xTestQueue;
+static QueueHandle_t xTestQueue;
 
 /* Handle to the secondary task is required by the primary task for calls
 to vTaskSuspend/Resume(). */
-static xTaskHandle xSecondary;
+static TaskHandle_t xSecondary;
 
 /* Used to ensure that tasks are still executing without error. */
-static volatile portBASE_TYPE xPrimaryCycles = 0, xSecondaryCycles = 0;
-static volatile portBASE_TYPE xErrorOccurred = pdFALSE;
+static volatile BaseType_t xPrimaryCycles = 0, xSecondaryCycles = 0;
+static volatile BaseType_t xErrorOccurred = pdFALSE;
 
 /* Provides a simple mechanism for the primary task to know when the
 secondary task has executed. */
-static volatile unsigned portBASE_TYPE xRunIndicator;
+static volatile UBaseType_t xRunIndicator;
 
 /* The two test tasks.  Their behaviour is commented within the files. */
 static void vPrimaryBlockTimeTestTask( void *pvParameters );
@@ -118,7 +123,7 @@ static void vSecondaryBlockTimeTestTask( void *pvParameters );
 void vCreateBlockTimeTasks( void )
 {
 	/* Create the queue on which the two tasks block. */
-    xTestQueue = xQueueCreate( bktQUEUE_LENGTH, sizeof( portBASE_TYPE ) );
+    xTestQueue = xQueueCreate( bktQUEUE_LENGTH, sizeof( BaseType_t ) );
 
 	/* vQueueAddToRegistry() adds the queue to the queue registry, if one is
 	in use.  The queue registry is provided as a means for kernel aware
@@ -126,19 +131,19 @@ void vCreateBlockTimeTasks( void )
 	is not being used.  The call to vQueueAddToRegistry() will be removed
 	by the pre-processor if configQUEUE_REGISTRY_SIZE is not defined or is
 	defined to be less than 1. */
-	vQueueAddToRegistry( xTestQueue, ( signed char * ) "Block_Time_Queue" );
+	vQueueAddToRegistry( xTestQueue, "Block_Time_Queue" );
 
 	/* Create the two test tasks. */
-	xTaskCreate( vPrimaryBlockTimeTestTask, ( signed char * )"BTest1", configMINIMAL_STACK_SIZE, NULL, bktPRIMARY_PRIORITY, NULL );
-	xTaskCreate( vSecondaryBlockTimeTestTask, ( signed char * )"BTest2", configMINIMAL_STACK_SIZE, NULL, bktSECONDARY_PRIORITY, &xSecondary );
+	xTaskCreate( vPrimaryBlockTimeTestTask, "BTest1", configMINIMAL_STACK_SIZE, NULL, bktPRIMARY_PRIORITY, NULL );
+	xTaskCreate( vSecondaryBlockTimeTestTask, "BTest2", configMINIMAL_STACK_SIZE, NULL, bktSECONDARY_PRIORITY, &xSecondary );
 }
 /*-----------------------------------------------------------*/
 
 static void vPrimaryBlockTimeTestTask( void *pvParameters )
 {
-portBASE_TYPE xItem, xData;
-portTickType xTimeWhenBlocking;
-portTickType xTimeToBlock, xBlockedTime;
+BaseType_t xItem, xData;
+TickType_t xTimeWhenBlocking;
+TickType_t xTimeToBlock, xBlockedTime;
 
 	( void ) pvParameters;
 
@@ -152,7 +157,7 @@ portTickType xTimeToBlock, xBlockedTime;
 		{
 			/* The queue is empty. Attempt to read from the queue using a block
 			time.  When we wake, ensure the delta in time is as expected. */
-			xTimeToBlock = ( portTickType ) ( bktPRIMARY_BLOCK_TIME << xItem );
+			xTimeToBlock = ( TickType_t ) ( bktPRIMARY_BLOCK_TIME << xItem );
 
 			xTimeWhenBlocking = xTaskGetTickCount();
 
@@ -203,7 +208,7 @@ portTickType xTimeToBlock, xBlockedTime;
 		{
 			/* The queue is full. Attempt to write to the queue using a block
 			time.  When we wake, ensure the delta in time is as expected. */
-			xTimeToBlock = ( portTickType ) ( bktPRIMARY_BLOCK_TIME << xItem );
+			xTimeToBlock = ( TickType_t ) ( bktPRIMARY_BLOCK_TIME << xItem );
 
 			xTimeWhenBlocking = xTaskGetTickCount();
 
@@ -387,8 +392,8 @@ portTickType xTimeToBlock, xBlockedTime;
 
 static void vSecondaryBlockTimeTestTask( void *pvParameters )
 {
-portTickType xTimeWhenBlocking, xBlockedTime;
-portBASE_TYPE xData;
+TickType_t xTimeWhenBlocking, xBlockedTime;
+BaseType_t xData;
 
 	( void ) pvParameters;
 
@@ -475,10 +480,10 @@ portBASE_TYPE xData;
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xAreBlockTimeTestTasksStillRunning( void )
+BaseType_t xAreBlockTimeTestTasksStillRunning( void )
 {
-static portBASE_TYPE xLastPrimaryCycleCount = 0, xLastSecondaryCycleCount = 0;
-portBASE_TYPE xReturn = pdPASS;
+static BaseType_t xLastPrimaryCycleCount = 0, xLastSecondaryCycleCount = 0;
+BaseType_t xReturn = pdPASS;
 
 	/* Have both tasks performed at least one cycle since this function was
 	last called? */

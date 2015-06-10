@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -122,7 +127,7 @@
 
 /* The time between cycles of the 'check' functionality (defined within the
 tick hook). */
-#define mainCHECK_DELAY						( ( portTickType ) 5000 / portTICK_RATE_MS )
+#define mainCHECK_DELAY						( ( TickType_t ) 5000 / portTICK_PERIOD_MS )
 
 /* The LCD task uses the sprintf function so requires a little more stack too. */
 #define mainLCD_TASK_STACK_SIZE				( configMINIMAL_STACK_SIZE * 2 )
@@ -162,7 +167,7 @@ static void prvLCDTask( void *pvParameters );
  * Hook functions that can get called by the kernel.  The 'check' functionality
  * is implemented within the tick hook.
  */
-void vApplicationStackOverflowHook( xTaskHandle pxTask, signed char *pcTaskName );
+void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName );
 
 /*
  * The tick hook function as described in the comments at the top of this file.
@@ -176,7 +181,7 @@ void vApplicationTickHook( void );
 /*-----------------------------------------------------------*/
 
 /* The queue used to send messages to the LCD task. */
-static xQueueHandle xLCDQueue;
+static QueueHandle_t xLCDQueue;
 
 /*-----------------------------------------------------------*/
 
@@ -193,17 +198,17 @@ int main( void )
 	port and provide some APU usage examples. */
     vStartIntegerMathTasks( mainINTEGER_TASK_PRIORITY );
     vStartGenericQueueTasks( mainGEN_QUEUE_TASK_PRIORITY );
-	vStartRecursiveMutexTasks();	
+	vStartRecursiveMutexTasks();
 	vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
 	vCreateBlockTimeTasks();
 	vStartSemaphoreTasks( mainSEM_TEST_PRIORITY );
 	vStartPolledQueueTasks( mainQUEUE_POLL_PRIORITY );
-	vStartQueuePeekTasks();	
-	vStartLEDFlashTasks( mainLED_TASK_PRIORITY );	
+	vStartQueuePeekTasks();
+	vStartLEDFlashTasks( mainLED_TASK_PRIORITY );
 	vAltStartComTestTasks( mainCOM_TEST_PRIORITY, mainBAUD_RATE, mainCOM_TEST_LED );
 
 	/* Start the tasks defined within this file/specific to this demo. */
-	xTaskCreate( prvLCDTask, ( signed char * ) "LCD", mainLCD_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
+	xTaskCreate( prvLCDTask, "LCD", mainLCD_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();
@@ -233,7 +238,7 @@ portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	if( ulTicksSinceLastDisplay >= mainCHECK_DELAY )
 	{
 		ulTicksSinceLastDisplay = 0;
-		
+
 		/* Has an error been found in any task? */
 		if( xAreGenericQueueTasksStillRunning() != pdTRUE )
 		{
@@ -262,16 +267,16 @@ portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 		else if( xAreQueuePeekTasksStillRunning() != pdTRUE )
 		{
 			xMessage.pcMessage = "ERROR IN PEEK Q";
-		}			
+		}
 		else if( xAreRecursiveMutexTasksStillRunning() != pdTRUE )
 		{
 			xMessage.pcMessage = "ERROR IN REC MUTEX";
-		}		
+		}
 		else if( xAreComTestTasksStillRunning() != pdTRUE )
 		{
 			xMessage.pcMessage = "ERROR IN COMTEST";
 		}
-		
+
 		/* Send the message to the LCD gatekeeper for display. */
 		xHigherPriorityTaskWoken = pdFALSE;
 		xQueueSendFromISR( xLCDQueue, &xMessage, &xHigherPriorityTaskWoken );
@@ -279,7 +284,7 @@ portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 }
 /*-----------------------------------------------------------*/
 
-void vApplicationStackOverflowHook( xTaskHandle pxTask, signed char *pcTaskName )
+void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 {
 	( void ) pxTask;
 	( void ) pcTaskName;
@@ -299,10 +304,10 @@ const unsigned long ulMaxY = 250, ulYIncrement = 22, ulWidth = 250, ulHeight = 2
 
     /* Initialize LCD. */
     LCDD_Initialize();
-    LCDD_Start();	
+    LCDD_Start();
 	LCDD_Fill( ( void * ) BOARD_LCD_BASE, COLOR_WHITE );
 	LCDD_DrawString( ( void * ) BOARD_LCD_BASE, 1, ulY + 3, "  www.FreeRTOS.org", COLOR_BLACK );
-	
+
 	for( ;; )
 	{
 		/* Wait for a message from the check function (which is executed in
@@ -311,10 +316,10 @@ const unsigned long ulMaxY = 250, ulYIncrement = 22, ulWidth = 250, ulHeight = 2
 
 		/* Clear the space where the old message was. */
         LCDD_DrawRectangle( ( void * ) BOARD_LCD_BASE, 0, ulY, ulWidth, ulHeight, COLOR_WHITE );
-		
+
 		/* Increment to the next drawing position. */
 		ulY += ulYIncrement;
-		
+
 		/* Have the Y position moved past the end of the LCD? */
 		if( ulY >= ulMaxY )
 		{
@@ -323,7 +328,7 @@ const unsigned long ulMaxY = 250, ulYIncrement = 22, ulWidth = 250, ulHeight = 2
 
 		/* Draw a new rectangle, in which the message will be written. */
         LCDD_DrawRectangle( ( void * ) BOARD_LCD_BASE, 0, ulY, ulWidth, ulHeight, COLOR_GREEN );
-		
+
 		/* Write the message. */
         LCDD_DrawString( ( void * ) BOARD_LCD_BASE, ulX, ulY + 3, xMessage.pcMessage, COLOR_BLACK );
 	}

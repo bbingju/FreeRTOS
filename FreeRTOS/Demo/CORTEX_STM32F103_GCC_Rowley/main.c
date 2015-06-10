@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -73,28 +78,28 @@
  * defined and/or created within this file:
  *
  * "Check" task - This only executes every five seconds but has the highest
- * priority so is guaranteed to get processor time.  Its main function is to 
+ * priority so is guaranteed to get processor time.  Its main function is to
  * check that all the standard demo tasks are still operational. The check task
  * will toggle LED 3 (PB11) every five seconds so long as no errors have been
- * detected.  The toggle rate will increase to half a second if an error has 
+ * detected.  The toggle rate will increase to half a second if an error has
  * been found in any task.
  *
- * "Echo" task - This is a very basic task that simply echoes any characters 
+ * "Echo" task - This is a very basic task that simply echoes any characters
  * received on COM0 (USART1).  This can be tested by transmitting a text file
  * from a dumb terminal to the STM32 USART then observing or capturing the text
- * that is echoed back.  Missing characters will be all the more obvious if the 
+ * that is echoed back.  Missing characters will be all the more obvious if the
  * file contains a simple repeating string of fixed width.
  *
- * Currently this demo does not include interrupt nesting examples.  High 
+ * Currently this demo does not include interrupt nesting examples.  High
  * frequency timer and simpler nesting examples can be found in most Cortex-M3
  * demo applications.
  *
- * The functions used to initialise, set and clear LED outputs are normally 
- * defined in partest.c.  This demo includes two partest files, one that is 
- * configured for use with the Keil MCBSTM32 evaluation board (called 
+ * The functions used to initialise, set and clear LED outputs are normally
+ * defined in partest.c.  This demo includes two partest files, one that is
+ * configured for use with the Keil MCBSTM32 evaluation board (called
  * ParTest_MCBSTM32.c) and one that is configured for use with the official
  * ST Eval board (called ParTest_ST_Eval.c).  One one of these files should be
- * included in the build at any one time, as appropriate for the hardware 
+ * included in the build at any one time, as appropriate for the hardware
  * actually being used.
  */
 
@@ -125,8 +130,8 @@
 
 /* The time between cycles of the 'check' task - which depends on whether the
 check task has detected an error or not. */
-#define mainCHECK_DELAY_NO_ERROR			( ( portTickType ) 5000 / portTICK_RATE_MS )
-#define mainCHECK_DELAY_ERROR				( ( portTickType ) 500 / portTICK_RATE_MS )
+#define mainCHECK_DELAY_NO_ERROR			( ( TickType_t ) 5000 / portTICK_PERIOD_MS )
+#define mainCHECK_DELAY_ERROR				( ( TickType_t ) 500 / portTICK_PERIOD_MS )
 
 /* The LED controlled by the 'check' task. */
 #define mainCHECK_LED						( 3 )
@@ -154,7 +159,7 @@ static void prvSetupHardware( void );
 /* The 'check' task as described at the top of this file. */
 static void prvCheckTask( void *pvParameters );
 
-/* A simple task that echoes all the characters that are received on COM0 
+/* A simple task that echoes all the characters that are received on COM0
 (USART1). */
 static void prvUSARTEchoTask( void *pvParameters );
 
@@ -180,10 +185,10 @@ int main( void )
     vStartRecursiveMutexTasks();
 
 	/* Create the 'echo' task, which is also defined within this file. */
-	xTaskCreate( prvUSARTEchoTask, ( signed char * ) "Echo", configMINIMAL_STACK_SIZE, NULL, mainECHO_TASK_PRIORITY, NULL );
+	xTaskCreate( prvUSARTEchoTask, "Echo", configMINIMAL_STACK_SIZE, NULL, mainECHO_TASK_PRIORITY, NULL );
 
 	/* Create the 'check' task, which is also defined within this file. */
-	xTaskCreate( prvCheckTask, ( signed char * ) "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
+	xTaskCreate( prvCheckTask, "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
 
     /* Start the scheduler. */
 	vTaskStartScheduler();
@@ -197,7 +202,7 @@ int main( void )
 /* Described at the top of this file. */
 static void prvCheckTask( void *pvParameters )
 {
-portTickType xLastExecutionTime;
+TickType_t xLastExecutionTime;
 unsigned long ulTicksToWait = mainCHECK_DELAY_NO_ERROR;
 
 	/* Just to remove the compiler warning about the unused parameter. */
@@ -253,7 +258,7 @@ signed char cChar;
 
 /* String declared static to ensure it does not end up on the stack, no matter
 what the optimisation level. */
-static const char *pcLongishString = 
+static const char *pcLongishString =
 "ABBA was a Swedish pop music group formed in Stockholm in 1972, consisting of Anni-Frid Frida Lyngstad, "
 "Björn Ulvaeus, Benny Andersson and Agnetha Fältskog. Throughout the band's existence, Fältskog and Ulvaeus "
 "were a married couple, as were Lyngstad and Andersson - although both couples later divorced. They became one "
@@ -292,41 +297,41 @@ static const char *pcLongishString =
 static void prvSetupHardware( void )
 {
 	/* RCC system reset(for debug purpose). */
-	RCC_DeInit ();                        
+	RCC_DeInit ();
 
     /* Enable HSE. */
-	RCC_HSEConfig( RCC_HSE_ON );           
-	
+	RCC_HSEConfig( RCC_HSE_ON );
+
 	/* Wait till HSE is ready. */
 	while (RCC_GetFlagStatus(RCC_FLAG_HSERDY) == RESET);
-	
+
     /* HCLK = SYSCLK. */
-	RCC_HCLKConfig( RCC_SYSCLK_Div1 );   
+	RCC_HCLKConfig( RCC_SYSCLK_Div1 );
 
     /* PCLK2  = HCLK. */
-	RCC_PCLK2Config( RCC_HCLK_Div1 );     
+	RCC_PCLK2Config( RCC_HCLK_Div1 );
 
     /* PCLK1  = HCLK/2. */
-	RCC_PCLK1Config( RCC_HCLK_Div2 );     
+	RCC_PCLK1Config( RCC_HCLK_Div2 );
 
 	/* ADCCLK = PCLK2/4. */
-	RCC_ADCCLKConfig( RCC_PCLK2_Div4 );    
-	
+	RCC_ADCCLKConfig( RCC_PCLK2_Div4 );
+
     /* Flash 2 wait state. */
-	*( volatile unsigned long  * )0x40022000 = 0x01;           
-	
+	*( volatile unsigned long  * )0x40022000 = 0x01;
+
 	/* PLLCLK = 8MHz * 9 = 72 MHz */
 	RCC_PLLConfig( RCC_PLLSource_HSE_Div1, RCC_PLLMul_9 );
-	
+
     /* Enable PLL. */
 	RCC_PLLCmd( ENABLE );
-	
+
 	/* Wait till PLL is ready. */
 	while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET);
-	
+
 	/* Select PLL as system clock source. */
 	RCC_SYSCLKConfig (RCC_SYSCLKSource_PLLCLK);
-	
+
 	/* Wait till PLL is used as system clock source. */
 	while (RCC_GetSYSCLKSource() != 0x08);
 
@@ -350,7 +355,7 @@ static void prvSetupHardware( void )
 }
 /*-----------------------------------------------------------*/
 
-void vApplicationStackOverflowHook( xTaskHandle pxTask, signed char *pcTaskName )
+void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 {
 	/* This function will get called if a task overflows its stack.   If the
 	parameters are corrupt then inspect pxCurrentTCB to find which was the

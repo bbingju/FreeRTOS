@@ -1,14 +1,15 @@
 /*
- * FreeRTOS+UDP V1.0.0 (C) 2013 Real Time Engineers ltd.
+ * FreeRTOS+UDP V1.0.4 (C) 2014 Real Time Engineers ltd.
+ * All rights reserved
  *
  * This file is part of the FreeRTOS+UDP distribution.  The FreeRTOS+UDP license
  * terms are different to the FreeRTOS license terms.
  *
- * FreeRTOS+UDP uses a dual license model that allows the software to be used 
- * under a standard GPL open source license, or a commercial license.  The 
- * standard GPL license (unlike the modified GPL license under which FreeRTOS 
- * itself is distributed) requires that all software statically linked with 
- * FreeRTOS+UDP is also distributed under the same GPL V2 license terms.  
+ * FreeRTOS+UDP uses a dual license model that allows the software to be used
+ * under a standard GPL open source license, or a commercial license.  The
+ * standard GPL license (unlike the modified GPL license under which FreeRTOS
+ * itself is distributed) requires that all software statically linked with
+ * FreeRTOS+UDP is also distributed under the same GPL V2 license terms.
  * Details of both license options follow:
  *
  * - Open source licensing -
@@ -20,9 +21,9 @@
  *
  * - Commercial licensing -
  * Businesses and individuals that for commercial or other reasons cannot comply
- * with the terms of the GPL V2 license must obtain a commercial license before 
- * incorporating FreeRTOS+UDP into proprietary software for distribution in any 
- * form.  Commercial licenses can be purchased from http://shop.freertos.org/udp 
+ * with the terms of the GPL V2 license must obtain a commercial license before
+ * incorporating FreeRTOS+UDP into proprietary software for distribution in any
+ * form.  Commercial licenses can be purchased from http://shop.freertos.org/udp
  * and do not require any source files to be changed.
  *
  * FreeRTOS+UDP is distributed in the hope that it will be useful.  You cannot
@@ -106,39 +107,39 @@ struct freertos_sockaddr
 #if ipconfigBYTE_ORDER == FREERTOS_LITTLE_ENDIAN
 
 	#define FreeRTOS_inet_addr_quick( ucOctet0, ucOctet1, ucOctet2, ucOctet3 )				\
-										( ( ( uint32_t ) ( ucOctet3 ) ) << 24UL ) |			\
-										( ( ( uint32_t ) ( ucOctet2 ) ) << 16UL ) |			\
-										( ( ( uint32_t ) ( ucOctet1 ) ) <<  8UL ) |			\
-										( ( uint32_t ) ( ucOctet0 ) )
+										( ( ( ( uint32_t ) ( ucOctet3 ) ) << 24UL ) |		\
+										  ( ( ( uint32_t ) ( ucOctet2 ) ) << 16UL ) |		\
+										  ( ( ( uint32_t ) ( ucOctet1 ) ) <<  8UL ) |		\
+										  ( ( uint32_t ) ( ucOctet0 ) ) )
 
 	#define FreeRTOS_inet_ntoa( ulIPAddress, pucBuffer )									\
 										sprintf( ( char * ) ( pucBuffer ), "%d.%d.%d.%d",	\
-											( ( ulIPAddress ) & 0xffUL ),					\
-											( ( ( ulIPAddress ) >> 8UL ) & 0xffUL ),		\
-											( ( ( ulIPAddress ) >> 16UL ) & 0xffUL ),		\
-											( ( ( ulIPAddress ) >> 24UL ) & 0xffUL ) )
+											( int ) ( ( ulIPAddress ) & 0xffUL ),			\
+											( int ) ( ( ( ulIPAddress ) >> 8UL ) & 0xffUL ),\
+											( int ) ( ( ( ulIPAddress ) >> 16UL ) & 0xffUL ),\
+											( int ) ( ( ( ulIPAddress ) >> 24UL ) & 0xffUL ) )
 
 #else /* ipconfigBYTE_ORDER */
 
 	#define FreeRTOS_inet_addr_quick( ucOctet0, ucOctet1, ucOctet2, ucOctet3 )				\
-										( ( ( uint32_t ) ( ucOctet0 ) ) << 24UL ) |			\
-										( ( ( uint32_t ) ( ucOctet1 ) ) << 16UL ) |			\
-										( ( ( uint32_t ) ( ucOctet2 ) ) <<  8UL ) |			\
-										( ( uint32_t ) ( ucOctet3 ) )
+										( ( ( ( uint32_t ) ( ucOctet0 ) ) << 24UL ) |		\
+										  ( ( ( uint32_t ) ( ucOctet1 ) ) << 16UL ) |		\
+										  ( ( ( uint32_t ) ( ucOctet2 ) ) <<  8UL ) |		\
+										  ( ( uint32_t ) ( ucOctet3 ) ) )
 
 	#define FreeRTOS_inet_ntoa( ulIPAddress, pucBuffer )									\
 										sprintf( ( char * ) ( pucBuffer ), "%d.%d.%d.%d",	\
-											( ( ( ulIPAddress ) >> 24UL ) & 0xffUL ) ),		\
+											( ( ( ulIPAddress ) >> 24UL ) & 0xffUL ),		\
 											( ( ( ulIPAddress ) >> 16UL ) & 0xffUL ),		\
 											( ( ( ulIPAddress ) >> 8UL ) & 0xffUL ),		\
-											( ( ulIPAddress ) & 0xffUL )
+											( ( ulIPAddress ) & 0xffUL ) )
 
 #endif /* ipconfigBYTE_ORDER */
 
 /* The socket type itself. */
 typedef void *xSocket_t;
 
-/* The xSocketSet_t type is the equivalent to the fd_set type used by the 
+/* The xSocketSet_t type is the equivalent to the fd_set type used by the
 Berkeley API. */
 typedef void *xSocketSet_t;
 
@@ -147,20 +148,20 @@ typedef void *xSocketSet_t;
  * FUNCTIONS IS AVAILABLE ON THE FOLLOWING URL:
  * http://www.FreeRTOS.org/FreeRTOS-Plus/FreeRTOS_Plus_UDP/FreeRTOS_UDP_API_Functions.shtml
  */
-xSocket_t FreeRTOS_socket( portBASE_TYPE xDomain, portBASE_TYPE xType, portBASE_TYPE xProtocol );
+xSocket_t FreeRTOS_socket( BaseType_t xDomain, BaseType_t xType, BaseType_t xProtocol );
 int32_t FreeRTOS_recvfrom( xSocket_t xSocket, void *pvBuffer, size_t xBufferLength, uint32_t ulFlags, struct freertos_sockaddr *pxSourceAddress, socklen_t *pxSourceAddressLength );
 int32_t FreeRTOS_sendto( xSocket_t xSocket, const void *pvBuffer, size_t xTotalDataLength, uint32_t ulFlags, const struct freertos_sockaddr *pxDestinationAddress, socklen_t xDestinationAddressLength );
-portBASE_TYPE FreeRTOS_bind( xSocket_t xSocket, struct freertos_sockaddr *pxAddress, socklen_t xAddressLength );
-portBASE_TYPE FreeRTOS_setsockopt( xSocket_t xSocket, int32_t lLevel, int32_t lOptionName, const void *pvOptionValue, size_t xOptionLength );
-portBASE_TYPE FreeRTOS_closesocket( xSocket_t xSocket );
-uint32_t FreeRTOS_gethostbyname( const uint8_t *pcHostName );
-uint32_t FreeRTOS_inet_addr( const uint8_t * pucIPAddress );
+BaseType_t FreeRTOS_bind( xSocket_t xSocket, struct freertos_sockaddr *pxAddress, socklen_t xAddressLength );
+BaseType_t FreeRTOS_setsockopt( xSocket_t xSocket, int32_t lLevel, int32_t lOptionName, const void *pvOptionValue, size_t xOptionLength );
+BaseType_t FreeRTOS_closesocket( xSocket_t xSocket );
+uint32_t FreeRTOS_gethostbyname( const char *pcHostName );
+uint32_t FreeRTOS_inet_addr( const char *pcIPAddress );
 
 #if ipconfigSUPPORT_SELECT_FUNCTION == 1
-	xSocketSet_t FreeRTOS_CreateSocketSet( unsigned portBASE_TYPE uxEventQueueLength );
-	portBASE_TYPE FreeRTOS_FD_SET( xSocket_t xSocket, xSocketSet_t xSocketSet );
-	portBASE_TYPE FreeRTOS_FD_CLR( xSocket_t xSocket, xSocketSet_t xSocketSet );
-	xSocket_t FreeRTOS_select( xSocketSet_t xSocketSet, portTickType xBlockTimeTicks );
+	xSocketSet_t FreeRTOS_CreateSocketSet( UBaseType_t uxEventQueueLength );
+	BaseType_t FreeRTOS_FD_SET( xSocket_t xSocket, xSocketSet_t xSocketSet );
+	BaseType_t FreeRTOS_FD_CLR( xSocket_t xSocket, xSocketSet_t xSocketSet );
+	xSocket_t FreeRTOS_select( xSocketSet_t xSocketSet, TickType_t xBlockTimeTicks );
 #endif /* ipconfigSUPPORT_SELECT_FUNCTION */
 
 #endif /* FREERTOS_UDP_H */

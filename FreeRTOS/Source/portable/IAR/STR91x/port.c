@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -84,15 +89,15 @@
 
 /* Constants required to setup the initial stack. */
 #ifndef _RUN_TASK_IN_ARM_MODE_
-	#define portINITIAL_SPSR			( ( portSTACK_TYPE ) 0x3f ) /* System mode, THUMB mode, interrupts enabled. */
+	#define portINITIAL_SPSR			( ( StackType_t ) 0x3f ) /* System mode, THUMB mode, interrupts enabled. */
 #else
-	#define portINITIAL_SPSR 			( ( portSTACK_TYPE ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
+	#define portINITIAL_SPSR 			( ( StackType_t ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
 #endif
 
-#define portINSTRUCTION_SIZE			( ( portSTACK_TYPE ) 4 )
+#define portINSTRUCTION_SIZE			( ( StackType_t ) 4 )
 
 /* Constants required to handle critical sections. */
-#define portNO_CRITICAL_NESTING 		( ( unsigned long ) 0 )
+#define portNO_CRITICAL_NESTING 		( ( uint32_t ) 0 )
 
 #ifndef abs
 	#define abs(x) ((x)>0 ? (x) : -(x))
@@ -129,7 +134,7 @@ static void prvSetupTimerInterrupt( void );
 /* ulCriticalNesting will get set to zero when the first task starts.  It
 cannot be initialised to 0 as this will cause interrupts to be enabled
 during the kernel initialisation process. */
-unsigned long ulCriticalNesting = ( unsigned long ) 9999;
+uint32_t ulCriticalNesting = ( uint32_t ) 9999;
 
 /* Tick interrupt routines for cooperative and preemptive operation
 respectively.  The preemptive version is not defined as __irq as it is called
@@ -152,9 +157,9 @@ static void prvDefaultHandler( void );
  *
  * See header file for description.
  */
-portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE pxCode, void *pvParameters )
+StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 {
-	portSTACK_TYPE *pxOriginalTOS;
+	StackType_t *pxOriginalTOS;
 
 	pxOriginalTOS = pxTopOfStack;
 
@@ -168,45 +173,45 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE
 	/* First on the stack is the return address - which in this case is the
 	start of the task.  The offset is added to make the return address appear
 	as it would within an IRQ ISR. */
-	*pxTopOfStack = ( portSTACK_TYPE ) pxCode + portINSTRUCTION_SIZE;		
+	*pxTopOfStack = ( StackType_t ) pxCode + portINSTRUCTION_SIZE;		
 	pxTopOfStack--;
 
-	*pxTopOfStack = ( portSTACK_TYPE ) 0xaaaaaaaa;	/* R14 */
+	*pxTopOfStack = ( StackType_t ) 0xaaaaaaaa;	/* R14 */
 	pxTopOfStack--;	
-	*pxTopOfStack = ( portSTACK_TYPE ) pxOriginalTOS; /* Stack used when task starts goes in R13. */
+	*pxTopOfStack = ( StackType_t ) pxOriginalTOS; /* Stack used when task starts goes in R13. */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x12121212;	/* R12 */
+	*pxTopOfStack = ( StackType_t ) 0x12121212;	/* R12 */
 	pxTopOfStack--;	
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x11111111;	/* R11 */
+	*pxTopOfStack = ( StackType_t ) 0x11111111;	/* R11 */
 	pxTopOfStack--;	
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x10101010;	/* R10 */
+	*pxTopOfStack = ( StackType_t ) 0x10101010;	/* R10 */
 	pxTopOfStack--;	
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x09090909;	/* R9 */
+	*pxTopOfStack = ( StackType_t ) 0x09090909;	/* R9 */
 	pxTopOfStack--;	
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x08080808;	/* R8 */
+	*pxTopOfStack = ( StackType_t ) 0x08080808;	/* R8 */
 	pxTopOfStack--;	
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x07070707;	/* R7 */
+	*pxTopOfStack = ( StackType_t ) 0x07070707;	/* R7 */
 	pxTopOfStack--;	
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x06060606;	/* R6 */
+	*pxTopOfStack = ( StackType_t ) 0x06060606;	/* R6 */
 	pxTopOfStack--;	
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x05050505;	/* R5 */
+	*pxTopOfStack = ( StackType_t ) 0x05050505;	/* R5 */
 	pxTopOfStack--;	
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x04040404;	/* R4 */
+	*pxTopOfStack = ( StackType_t ) 0x04040404;	/* R4 */
 	pxTopOfStack--;	
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x03030303;	/* R3 */
+	*pxTopOfStack = ( StackType_t ) 0x03030303;	/* R3 */
 	pxTopOfStack--;	
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x02020202;	/* R2 */
+	*pxTopOfStack = ( StackType_t ) 0x02020202;	/* R2 */
 	pxTopOfStack--;	
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x01010101;	/* R1 */
+	*pxTopOfStack = ( StackType_t ) 0x01010101;	/* R1 */
 	pxTopOfStack--;	
 
 	/* When the task starts is will expect to find the function parameter in
 	R0. */
-	*pxTopOfStack = ( portSTACK_TYPE ) pvParameters; /* R0 */
+	*pxTopOfStack = ( StackType_t ) pvParameters; /* R0 */
 	pxTopOfStack--;
 
 	/* The status register is set for system mode, with interrupts enabled. */
-	*pxTopOfStack = ( portSTACK_TYPE ) portINITIAL_SPSR;
+	*pxTopOfStack = ( StackType_t ) portINITIAL_SPSR;
 	pxTopOfStack--;
 
 	/* Interrupt flags cannot always be stored on the stack and will
@@ -218,7 +223,7 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xPortStartScheduler( void )
+BaseType_t xPortStartScheduler( void )
 {
 extern void vPortStartFirstTask( void );
 
@@ -252,7 +257,7 @@ keyword. */
 	
 		u32 b0;
 		u16 a0;
-		long err, err_min=n;
+		int32_t err, err_min=n;
 	
 		*a = a0 = ((n-1)/65536ul) + 1;
 		*b = b0 = n / *a;
@@ -260,11 +265,11 @@ keyword. */
 		for (; *a <= 256; (*a)++)
 		{
 			*b = n / *a;
-			err = (long)*a * (long)*b - (long)n;
+			err = (int32_t)*a * (int32_t)*b - (int32_t)n;
 			if (abs(err) > (*a / 2))
 			{
 				(*b)++;
-				err = (long)*a * (long)*b - (long)n;
+				err = (int32_t)*a * (int32_t)*b - (int32_t)n;
 			}
 			if (abs(err) < abs(err_min))
 			{
@@ -283,8 +288,8 @@ keyword. */
 	static void prvSetupTimerInterrupt( void )
 	{
 	WDG_InitTypeDef xWdg;
-	unsigned short a;
-	unsigned long n = configCPU_PERIPH_HZ / configTICK_RATE_HZ, b;
+	uint16_t a;
+	uint32_t n = configCPU_PERIPH_HZ / configTICK_RATE_HZ, b;
 	
 		/* Configure the watchdog as a free running timer that generates a
 		periodic interrupt. */
@@ -303,8 +308,8 @@ keyword. */
 		VIC_ITCmd( WDG_ITLine, ENABLE );
 		
 		/* Install the default handlers for both VIC's. */
-		VIC0->DVAR = ( unsigned long ) prvDefaultHandler;
-		VIC1->DVAR = ( unsigned long ) prvDefaultHandler;
+		VIC0->DVAR = ( uint32_t ) prvDefaultHandler;
+		VIC1->DVAR = ( uint32_t ) prvDefaultHandler;
 		
 		WDG_Cmd(ENABLE);
 	}
@@ -334,7 +339,7 @@ keyword. */
 	
 		u16 b0;
 		u8 a0;
-		long err, err_min=n;
+		int32_t err, err_min=n;
 	
 	
 		*a = a0 = ((n-1)/256) + 1;
@@ -343,11 +348,11 @@ keyword. */
 		for (; *a <= 256; (*a)++)
 		{
 			*b = n / *a;
-			err = (long)*a * (long)*b - (long)n;
+			err = (int32_t)*a * (int32_t)*b - (int32_t)n;
 			if (abs(err) > (*a / 2))
 			{
 				(*b)++;
-				err = (long)*a * (long)*b - (long)n;
+				err = (int32_t)*a * (int32_t)*b - (int32_t)n;
 			}
 			if (abs(err) < abs(err_min))
 			{
@@ -365,9 +370,9 @@ keyword. */
 
 	static void prvSetupTimerInterrupt( void )
 	{
-		unsigned char a;
-		unsigned short b;
-		unsigned long n = configCPU_PERIPH_HZ / configTICK_RATE_HZ;
+		uint8_t a;
+		uint16_t b;
+		uint32_t n = configCPU_PERIPH_HZ / configTICK_RATE_HZ;
 		
 		TIM_InitTypeDef timer;
 		
@@ -391,8 +396,8 @@ keyword. */
 		VIC_ITCmd( TIM2_ITLine, ENABLE );
 		
 		/* Install the default handlers for both VIC's. */
-		VIC0->DVAR = ( unsigned long ) prvDefaultHandler;
-		VIC1->DVAR = ( unsigned long ) prvDefaultHandler;
+		VIC0->DVAR = ( uint32_t ) prvDefaultHandler;
+		VIC1->DVAR = ( uint32_t ) prvDefaultHandler;
 		
 		TIM_CounterCmd(TIM2, TIM_CLEAR);
 		TIM_CounterCmd(TIM2, TIM_START);

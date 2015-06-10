@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -62,9 +67,9 @@
     1 tab == 4 spaces!
 */
 
-/* 
+/*
 	NOTE : Tasks run in system mode and the scheduler runs in Supervisor mode.
-	The processor MUST be in supervisor mode when vTaskStartScheduler is 
+	The processor MUST be in supervisor mode when vTaskStartScheduler is
 	called.  The demo applications included in the FreeRTOS.org download switch
 	to supervisor mode prior to main being called.  If you are not using one of
 	these demo application projects then ensure Supervisor mode is used.
@@ -73,7 +78,7 @@
 
 /*
  * Program entry point.
- * 
+ *
  * main() is responsible for setting up the microcontroller peripherals, then
  * starting the demo application tasks.  Once the tasks have been created the
  * scheduler is started and main() should never complete.
@@ -143,7 +148,7 @@
 
 /*
  * The Olimex demo board has a single built in LED.  This function simply
- * toggles its state. 
+ * toggles its state.
  */
 void prvToggleOnBoardLED( void );
 
@@ -158,7 +163,7 @@ static void prvSetupHardware( void );
 static void prvErrorChecks( void *pvParameters );
 
 /*
- * Return true if the demo tasks are executing without error - otherwise 
+ * Return true if the demo tasks are executing without error - otherwise
  * return false.
  */
 static void prvMainCheckOtherTasksAreStillRunning( void );
@@ -169,14 +174,14 @@ long lErrorInTask = pdFALSE;
 
 /*
  * Application entry point:
- * Starts all the other tasks, then starts the scheduler. 
+ * Starts all the other tasks, then starts the scheduler.
  */
 int main( void )
 {
 	/* Setup the hardware for use with the Olimex demo board. */
 	prvSetupHardware();
 
-	/* Start the standard flash tasks so the WEB server is not the only thing 
+	/* Start the standard flash tasks so the WEB server is not the only thing
 	running. */
 	vStartLEDFlashTasks( mainLED_TASK_PRIORITY );
 	vStartSemaphoreTasks( tskIDLE_PRIORITY );
@@ -186,13 +191,13 @@ int main( void )
 	vStartIntegerMathTasks( tskIDLE_PRIORITY );
 
 	/* Start the WEB server task and the error check task. */
-	xTaskCreate( vHTTPServerTask, ( signed char * ) "HTTP", configMINIMAL_STACK_SIZE, NULL, mainHTTP_TASK_PRIORITY, NULL );
-	xTaskCreate( prvErrorChecks, ( signed char * ) "Check", configMINIMAL_STACK_SIZE, NULL, mainERROR_CHECK_PRIORITY, NULL );
-	
+	xTaskCreate( vHTTPServerTask, "HTTP", configMINIMAL_STACK_SIZE, NULL, mainHTTP_TASK_PRIORITY, NULL );
+	xTaskCreate( prvErrorChecks, "Check", configMINIMAL_STACK_SIZE, NULL, mainERROR_CHECK_PRIORITY, NULL );
+
 	/* Now all the tasks have been started - start the scheduler.
 
 	NOTE : Tasks run in system mode and the scheduler runs in Supervisor mode.
-	The processor MUST be in supervisor mode when vTaskStartScheduler is 
+	The processor MUST be in supervisor mode when vTaskStartScheduler is
 	called.  The demo applications included in the FreeRTOS.org download switch
 	to supervisor mode prior to main being called.  If you are not using one of
 	these demo application projects then ensure Supervisor mode is used. */
@@ -210,8 +215,8 @@ static void prvSetupHardware( void )
 		SCB_MEMMAP = 2;
 	#endif
 
-	/* Set all GPIO to output other than the P0.14 (BSL), and the JTAG pins.  
-	The JTAG pins are left as input as I'm not sure what will happen if the 
+	/* Set all GPIO to output other than the P0.14 (BSL), and the JTAG pins.
+	The JTAG pins are left as input as I'm not sure what will happen if the
 	Wiggler is connected after powerup - not that it would be a good idea to
 	do that anyway. */
 	GPIO_IODIR = ~( mainJTAG_PORT );
@@ -296,13 +301,13 @@ unsigned long ulState;
 	else
 	{
 		GPIO_IOSET = mainON_BOARD_LED_BIT;
-	}	
+	}
 }
 /*-----------------------------------------------------------*/
 
 static void prvErrorChecks( void *pvParameters )
 {
-portTickType xDelay = mainNO_ERROR_DELAY;
+TickType_t xDelay = mainNO_ERROR_DELAY;
 
 	/* The parameters are not used. */
 	( void ) pvParameters;
@@ -310,7 +315,7 @@ portTickType xDelay = mainNO_ERROR_DELAY;
 	for( ;; )
 	{
 		/* How long we delay depends on whether an error has been detected
-		or not.  Therefore the flash rate of the on board LED indicates 
+		or not.  Therefore the flash rate of the on board LED indicates
 		whether or not an error has occurred. */
 		vTaskDelay( xDelay );
 

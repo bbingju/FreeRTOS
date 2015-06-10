@@ -1,5 +1,6 @@
 /*
- * FreeRTOS+UDP V1.0.0 (C) 2013 Real Time Engineers ltd.
+ * FreeRTOS+UDP V1.0.4 (C) 2014 Real Time Engineers ltd.
+ * All rights reserved
  *
  * This file is part of the FreeRTOS+UDP distribution.  The FreeRTOS+UDP license
  * terms are different to the FreeRTOS license terms.
@@ -84,9 +85,9 @@ static xSemaphoreHandle xNetworkBufferSemaphore = NULL;
 
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xNetworkBuffersInitialise( void )
+BaseType_t xNetworkBuffersInitialise( void )
 {
-portBASE_TYPE xReturn, x;
+BaseType_t xReturn, x;
 
 	/* Only initialise the buffers and their associated kernel objects if they
 	have not been initialised before. */
@@ -94,7 +95,7 @@ portBASE_TYPE xReturn, x;
 	{
 		xNetworkBufferSemaphore = xSemaphoreCreateCounting( ipconfigNUM_NETWORK_BUFFERS, ipconfigNUM_NETWORK_BUFFERS );
 		configASSERT( xNetworkBufferSemaphore );
-		vQueueAddToRegistry( xNetworkBufferSemaphore, ( signed char * ) "NetBufSem" );
+		vQueueAddToRegistry( xNetworkBufferSemaphore, "NetBufSem" );
 
 		/* If the trace recorder code is included name the semaphore for viewing
 		in FreeRTOS+Trace.  */
@@ -176,7 +177,7 @@ void vEthernetBufferRelease( uint8_t *pucEthernetBuffer )
 }
 /*-----------------------------------------------------------*/
 
-xNetworkBufferDescriptor_t *pxNetworkBufferGet( size_t xRequestedSizeBytes, portTickType xBlockTimeTicks )
+xNetworkBufferDescriptor_t *pxNetworkBufferGet( size_t xRequestedSizeBytes, TickType_t xBlockTimeTicks )
 {
 xNetworkBufferDescriptor_t *pxReturn = NULL;
 
@@ -246,7 +247,7 @@ xNetworkBufferDescriptor_t *pxReturn = NULL;
 
 void vNetworkBufferRelease( xNetworkBufferDescriptor_t * const pxNetworkBuffer )
 {
-portBASE_TYPE xListItemAlreadyInFreeList;
+BaseType_t xListItemAlreadyInFreeList;
 
 	/* Ensure the buffer is returned to the list of free buffers before the
 	counting semaphore is 'given' to say a buffer is available.  Release the
@@ -276,7 +277,7 @@ portBASE_TYPE xListItemAlreadyInFreeList;
 
 #if( ipconfigINCLUDE_TEST_CODE == 1 )
 
-unsigned portBASE_TYPE uxGetNumberOfFreeNetworkBuffers( void )
+UBaseType_t uxGetNumberOfFreeNetworkBuffers( void )
 {
 	return listCURRENT_LIST_LENGTH( &xFreeBuffersList );
 }

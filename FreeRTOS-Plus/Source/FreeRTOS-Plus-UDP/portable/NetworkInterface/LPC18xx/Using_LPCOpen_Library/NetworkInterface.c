@@ -1,14 +1,15 @@
 /*
- * FreeRTOS+UDP V1.0.0 (C) 2013 Real Time Engineers ltd.
+ * FreeRTOS+UDP V1.0.4 (C) 2014 Real Time Engineers ltd.
+ * All rights reserved
  *
  * This file is part of the FreeRTOS+UDP distribution.  The FreeRTOS+UDP license
  * terms are different to the FreeRTOS license terms.
  *
- * FreeRTOS+UDP uses a dual license model that allows the software to be used 
- * under a standard GPL open source license, or a commercial license.  The 
- * standard GPL license (unlike the modified GPL license under which FreeRTOS 
- * itself is distributed) requires that all software statically linked with 
- * FreeRTOS+UDP is also distributed under the same GPL V2 license terms.  
+ * FreeRTOS+UDP uses a dual license model that allows the software to be used
+ * under a standard GPL open source license, or a commercial license.  The
+ * standard GPL license (unlike the modified GPL license under which FreeRTOS
+ * itself is distributed) requires that all software statically linked with
+ * FreeRTOS+UDP is also distributed under the same GPL V2 license terms.
  * Details of both license options follow:
  *
  * - Open source licensing -
@@ -20,9 +21,9 @@
  *
  * - Commercial licensing -
  * Businesses and individuals that for commercial or other reasons cannot comply
- * with the terms of the GPL V2 license must obtain a commercial license before 
- * incorporating FreeRTOS+UDP into proprietary software for distribution in any 
- * form.  Commercial licenses can be purchased from http://shop.freertos.org/udp 
+ * with the terms of the GPL V2 license must obtain a commercial license before
+ * incorporating FreeRTOS+UDP into proprietary software for distribution in any
+ * form.  Commercial licenses can be purchased from http://shop.freertos.org/udp
  * and do not require any source files to be changed.
  *
  * FreeRTOS+UDP is distributed in the hope that it will be useful.  You cannot
@@ -77,7 +78,7 @@
 operation will be held in the Blocked state (so other tasks can execute) for
 niTX_BUFFER_FREE_WAIT ticks.  It will do this a maximum of niMAX_TX_ATTEMPTS
 before giving up. */
-#define niTX_BUFFER_FREE_WAIT	( ( portTickType ) 2UL / portTICK_RATE_MS )
+#define niTX_BUFFER_FREE_WAIT	( ( TickType_t ) 2UL / portTICK_RATE_MS )
 #define niMAX_TX_ATTEMPTS		( 5 )
 
 /*-----------------------------------------------------------*/
@@ -98,9 +99,9 @@ xSemaphoreHandle xEMACRxEventSemaphore = NULL;
 
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xNetworkInterfaceInitialise( void )
+BaseType_t xNetworkInterfaceInitialise( void )
 {
-portBASE_TYPE xReturn;
+BaseType_t xReturn;
 extern uint8_t ucMACAddress[ 6 ];
 
 	xReturn = xEMACInit( ucMACAddress );
@@ -125,7 +126,7 @@ extern uint8_t ucMACAddress[ 6 ];
 			possible priority to ensure the interrupt handler can return directly to
 			it no matter which task was running when the interrupt occurred. */
 			xTaskCreate( 	prvEMACDeferredInterruptHandlerTask,/* The function that implements the task. */
-							( const signed char * const ) "MACTsk",
+							"MACTsk",
 							configMINIMAL_STACK_SIZE,	/* Stack allocated to the task (defined in words, not bytes). */
 							NULL, 						/* The task parameter is not used. */
 							configMAX_PRIORITIES - 1, 	/* The priority assigned to the task. */
@@ -137,9 +138,9 @@ extern uint8_t ucMACAddress[ 6 ];
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xNetworkInterfaceOutput( xNetworkBufferDescriptor_t * const pxNetworkBuffer )
+BaseType_t xNetworkInterfaceOutput( xNetworkBufferDescriptor_t * const pxNetworkBuffer )
 {
-portBASE_TYPE xReturn = pdFAIL;
+BaseType_t xReturn = pdFAIL;
 int32_t x;
 
 	/* Attempt to obtain access to a Tx descriptor. */
@@ -202,7 +203,7 @@ xIPStackEvent_t xRxEvent = { eEthernetRxEvent, NULL };
 		{
 			/* The buffer filled by the DMA is going to be passed into the IP
 			stack.  Allocate another buffer for the DMA descriptor. */
-			pxNetworkBuffer = pxNetworkBufferGet( ipTOTAL_ETHERNET_FRAME_SIZE, ( portTickType ) 0 );
+			pxNetworkBuffer = pxNetworkBufferGet( ipTOTAL_ETHERNET_FRAME_SIZE, ( TickType_t ) 0 );
 
 			if( pxNetworkBuffer != NULL )
 			{
@@ -239,7 +240,7 @@ xIPStackEvent_t xRxEvent = { eEthernetRxEvent, NULL };
 					/* Data was received and stored.  Send it to the IP task
 					for processing. */
 					xRxEvent.pvData = ( void * ) pxNetworkBuffer;
-					if( xQueueSendToBack( xNetworkEventQueue, &xRxEvent, ( portTickType ) 0 ) == pdFALSE )
+					if( xQueueSendToBack( xNetworkEventQueue, &xRxEvent, ( TickType_t ) 0 ) == pdFALSE )
 					{
 						/* The buffer could not be sent to the IP task so the
 						buffer must be released. */

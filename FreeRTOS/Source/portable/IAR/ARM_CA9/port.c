@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -112,30 +117,33 @@
 	#error configMAX_API_CALL_INTERRUPT_PRIORITY must be greater than ( configUNIQUE_INTERRUPT_PRIORITIES / 2 )
 #endif
 
+#ifndef configCLEAR_TICK_INTERRUPT
+	#define configCLEAR_TICK_INTERRUPT()
+#endif
+
 /* A critical section is exited when the critical section nesting count reaches
 this value. */
-#define portNO_CRITICAL_NESTING			( ( unsigned long ) 0 )
+#define portNO_CRITICAL_NESTING			( ( uint32_t ) 0 )
 
 /* In all GICs 255 can be written to the priority mask register to unmask all
 (but the lowest) interrupt priority. */
-#define portUNMASK_VALUE				( 0xFF )
+#define portUNMASK_VALUE				( 0xFFUL )
 
 /* Tasks are not created with a floating point context, but can be given a
 floating point context after they have been created.  A variable is stored as
 part of the tasks context that holds portNO_FLOATING_POINT_CONTEXT if the task
 does not have an FPU context, or any other value if the task does have an FPU
 context. */
-#define portNO_FLOATING_POINT_CONTEXT	( ( portSTACK_TYPE ) 0 )
+#define portNO_FLOATING_POINT_CONTEXT	( ( StackType_t ) 0 )
 
 /* Constants required to setup the initial task context. */
-#define portINITIAL_SPSR				( ( portSTACK_TYPE ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
-#define portTHUMB_MODE_BIT				( ( portSTACK_TYPE ) 0x20 )
-#define portINTERRUPT_ENABLE_BIT		( 0x80UL )
+#define portINITIAL_SPSR				( ( StackType_t ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
+#define portTHUMB_MODE_BIT				( ( StackType_t ) 0x20 )
 #define portTHUMB_MODE_ADDRESS			( 0x01UL )
 
 /* Used by portASSERT_IF_INTERRUPT_PRIORITY_INVALID() when ensuring the binary
 point is zero. */
-#define portBINARY_POINT_BITS			( ( unsigned char ) 0x03 )
+#define portBINARY_POINT_BITS			( ( uint8_t ) 0x03 )
 
 /* Masks all bits in the APSR other than the mode bits. */
 #define portAPSR_MODE_BITS_MASK			( 0x1F )
@@ -162,6 +170,11 @@ mode. */
  */
 extern void vPortRestoreTaskContext( void );
 
+/*
+ * Used to catch tasks that attempt to return from their implementing function.
+ */
+static void prvTaskExitError( void );
+
 /*-----------------------------------------------------------*/
 
 /* A variable is used to keep track of the critical section nesting.  This
@@ -169,18 +182,18 @@ variable has to be stored as part of the task context and must be initialised to
 a non zero value to ensure interrupts don't inadvertently become unmasked before
 the scheduler starts.  As it is stored as part of the task context it will
 automatically be set to 0 when the first task is started. */
-volatile unsigned long ulCriticalNesting = 9999UL;
+volatile uint32_t ulCriticalNesting = 9999UL;
 
-/* Saved as part of the task context.  If ulPortTaskHasFPUContext is non-zero then
-a floating point context must be saved and restored for the task. */
-unsigned long ulPortTaskHasFPUContext = pdFALSE;
+/* Saved as part of the task context.  If ulPortTaskHasFPUContext is non-zero
+then a floating point context must be saved and restored for the task. */
+uint32_t ulPortTaskHasFPUContext = pdFALSE;
 
 /* Set to 1 to pend a context switch from an ISR. */
-unsigned long ulPortYieldRequired = pdFALSE;
+uint32_t ulPortYieldRequired = pdFALSE;
 
 /* Counts the interrupt nesting depth.  A context switch is only performed if
 if the nesting depth is 0. */
-unsigned long ulPortInterruptNesting = 0UL;
+uint32_t ulPortInterruptNesting = 0UL;
 
 
 /*-----------------------------------------------------------*/
@@ -188,7 +201,7 @@ unsigned long ulPortInterruptNesting = 0UL;
 /*
  * See header file for description.
  */
-portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE pxCode, void *pvParameters )
+StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 {
 	/* Setup the initial stack of the task.  The stack is set exactly as
 	expected by the portRESTORE_CONTEXT() macro.
@@ -202,9 +215,9 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE
 	pxTopOfStack--;
 	*pxTopOfStack = NULL;
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) portINITIAL_SPSR;
+	*pxTopOfStack = ( StackType_t ) portINITIAL_SPSR;
 
-	if( ( ( unsigned long ) pxCode & portTHUMB_MODE_ADDRESS ) != 0x00UL )
+	if( ( ( uint32_t ) pxCode & portTHUMB_MODE_ADDRESS ) != 0x00UL )
 	{
 		/* The task will start in THUMB mode. */
 		*pxTopOfStack |= portTHUMB_MODE_BIT;
@@ -213,37 +226,37 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE
 	pxTopOfStack--;
 
 	/* Next the return address, which in this case is the start of the task. */
-	*pxTopOfStack = ( portSTACK_TYPE ) pxCode;
+	*pxTopOfStack = ( StackType_t ) pxCode;
 	pxTopOfStack--;
 
 	/* Next all the registers other than the stack pointer. */
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x00000000;	/* R14 */
+	*pxTopOfStack = ( StackType_t ) prvTaskExitError;	/* R14 */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x12121212;	/* R12 */
+	*pxTopOfStack = ( StackType_t ) 0x12121212;	/* R12 */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x11111111;	/* R11 */
+	*pxTopOfStack = ( StackType_t ) 0x11111111;	/* R11 */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x10101010;	/* R10 */
+	*pxTopOfStack = ( StackType_t ) 0x10101010;	/* R10 */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x09090909;	/* R9 */
+	*pxTopOfStack = ( StackType_t ) 0x09090909;	/* R9 */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x08080808;	/* R8 */
+	*pxTopOfStack = ( StackType_t ) 0x08080808;	/* R8 */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x07070707;	/* R7 */
+	*pxTopOfStack = ( StackType_t ) 0x07070707;	/* R7 */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x06060606;	/* R6 */
+	*pxTopOfStack = ( StackType_t ) 0x06060606;	/* R6 */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x05050505;	/* R5 */
+	*pxTopOfStack = ( StackType_t ) 0x05050505;	/* R5 */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x04040404;	/* R4 */
+	*pxTopOfStack = ( StackType_t ) 0x04040404;	/* R4 */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x03030303;	/* R3 */
+	*pxTopOfStack = ( StackType_t ) 0x03030303;	/* R3 */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x02020202;	/* R2 */
+	*pxTopOfStack = ( StackType_t ) 0x02020202;	/* R2 */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x01010101;	/* R1 */
+	*pxTopOfStack = ( StackType_t ) 0x01010101;	/* R1 */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) pvParameters; /* R0 */
+	*pxTopOfStack = ( StackType_t ) pvParameters; /* R0 */
 	pxTopOfStack--;
 
 	/* The task will start with a critical nesting count of 0 as interrupts are
@@ -260,9 +273,23 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xPortStartScheduler( void )
+static void prvTaskExitError( void )
 {
-unsigned long ulAPSR;
+	/* A function that implements a task must not exit or attempt to return to
+	its caller as there is nothing to return to.  If a task wants to exit it
+	should instead call vTaskDelete( NULL ).
+
+	Artificially force an assert() to be triggered if configASSERT() is
+	defined, then stop here so application writers can catch the error. */
+	configASSERT( ulPortInterruptNesting == ~0UL );
+	portDISABLE_INTERRUPTS();
+	for( ;; );
+}
+/*-----------------------------------------------------------*/
+
+BaseType_t xPortStartScheduler( void )
+{
+uint32_t ulAPSR;
 
 	/* Only continue if the CPU is not in User mode.  The CPU must be in a
 	Privileged mode for the scheduler to start. */
@@ -296,8 +323,9 @@ unsigned long ulAPSR;
 
 void vPortEndScheduler( void )
 {
-	/* It is unlikely that the ARM port will require this function as there
-	is nothing to return to. */
+	/* Not implemented in ports where there is nothing to return to.
+	Artificially force an assert. */
+	configASSERT( ulCriticalNesting == 1000UL );
 }
 /*-----------------------------------------------------------*/
 
@@ -310,6 +338,16 @@ void vPortEnterCritical( void )
 	directly.  Increment ulCriticalNesting to keep a count of how many times
 	portENTER_CRITICAL() has been called. */
 	ulCriticalNesting++;
+	
+	/* This is not the interrupt safe version of the enter critical function so
+	assert() if it is being called from an interrupt context.  Only API 
+	functions that end in "FromISR" can be used in an interrupt.  Only assert if
+	the critical nesting count is 1 to protect against recursive calls if the
+	assert function also uses a critical section. */
+	if( ulCriticalNesting == 1 )
+	{
+		configASSERT( ulPortInterruptNesting == 0 );
+	}
 }
 /*-----------------------------------------------------------*/
 
@@ -339,7 +377,7 @@ void FreeRTOS_Tick_Handler( void )
 	handler runs at the lowest priority, so interrupts cannot already be masked,
 	so there is no need to save and restore the current mask value. */
 	__disable_irq();
-	portICCPMR_PRIORITY_MASK_REGISTER = ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
+	portICCPMR_PRIORITY_MASK_REGISTER = ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
 	__asm(	"DSB		\n"
 			"ISB		\n" );
 	__enable_irq();
@@ -352,12 +390,13 @@ void FreeRTOS_Tick_Handler( void )
 
 	/* Ensure all interrupt priorities are active again. */
 	portCLEAR_INTERRUPT_MASK();
+	configCLEAR_TICK_INTERRUPT();
 }
 /*-----------------------------------------------------------*/
 
 void vPortTaskUsesFPU( void )
 {
-unsigned long ulInitialFPSCR = 0;
+uint32_t ulInitialFPSCR = 0;
 
 	/* A task is registering the fact that it needs an FPU context.  Set the
 	FPU flag (which is saved as part of the task context). */
@@ -368,7 +407,7 @@ unsigned long ulInitialFPSCR = 0;
 }
 /*-----------------------------------------------------------*/
 
-void vPortClearInterruptMask( unsigned long ulNewMaskValue )
+void vPortClearInterruptMask( uint32_t ulNewMaskValue )
 {
 	if( ulNewMaskValue == pdFALSE )
 	{
@@ -377,12 +416,12 @@ void vPortClearInterruptMask( unsigned long ulNewMaskValue )
 }
 /*-----------------------------------------------------------*/
 
-unsigned long ulPortSetInterruptMask( void )
+uint32_t ulPortSetInterruptMask( void )
 {
-unsigned long ulReturn;
+uint32_t ulReturn;
 
 	__disable_irq();
-	if( portICCPMR_PRIORITY_MASK_REGISTER == ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) )
+	if( portICCPMR_PRIORITY_MASK_REGISTER == ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) )
 	{
 		/* Interrupts were already masked. */
 		ulReturn = pdTRUE;
@@ -390,7 +429,7 @@ unsigned long ulReturn;
 	else
 	{
 		ulReturn = pdFALSE;
-		portICCPMR_PRIORITY_MASK_REGISTER = ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
+		portICCPMR_PRIORITY_MASK_REGISTER = ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
 		__asm(	"DSB		\n"
 				"ISB		\n" );
 	}
@@ -422,7 +461,7 @@ unsigned long ulReturn;
 		The following links provide detailed information:
 		http://www.freertos.org/RTOS-Cortex-M3-M4.html
 		http://www.freertos.org/FAQHelp.html */
-		configASSERT( portICCRPR_RUNNING_PRIORITY_REGISTER >= ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) );
+		configASSERT( portICCRPR_RUNNING_PRIORITY_REGISTER >= ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) );
 
 		/* Priority grouping:  The interrupt controller (GIC) allows the bits
 		that define each interrupt's priority to be split between bits that

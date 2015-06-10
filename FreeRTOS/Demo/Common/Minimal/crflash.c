@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -117,28 +122,28 @@ created. */
 /*
  * The 'fixed delay' co-routine as described at the top of the file.
  */
-static void prvFixedDelayCoRoutine( xCoRoutineHandle xHandle, unsigned portBASE_TYPE uxIndex );
+static void prvFixedDelayCoRoutine( CoRoutineHandle_t xHandle, UBaseType_t uxIndex );
 
 /*
  * The 'flash' co-routine as described at the top of the file.
  */
-static void prvFlashCoRoutine( xCoRoutineHandle xHandle, unsigned portBASE_TYPE uxIndex );
+static void prvFlashCoRoutine( CoRoutineHandle_t xHandle, UBaseType_t uxIndex );
 
 /* The queue used to pass data between the 'fixed delay' co-routines and the
 'flash' co-routine. */
-static xQueueHandle xFlashQueue;
+static QueueHandle_t xFlashQueue;
 
 /* This will be set to pdFALSE if we detect an error. */
-static portBASE_TYPE xCoRoutineFlashStatus = pdPASS;
+static BaseType_t xCoRoutineFlashStatus = pdPASS;
 
 /*-----------------------------------------------------------*/
 
 /*
  * See the header file for details.
  */
-void vStartFlashCoRoutines( unsigned portBASE_TYPE uxNumberToCreate )
+void vStartFlashCoRoutines( UBaseType_t uxNumberToCreate )
 {
-unsigned portBASE_TYPE uxIndex;
+UBaseType_t uxIndex;
 
 	if( uxNumberToCreate > crfMAX_FLASH_TASKS )
 	{
@@ -146,7 +151,7 @@ unsigned portBASE_TYPE uxIndex;
 	}
 
 	/* Create the queue used to pass data between the co-routines. */
-	xFlashQueue = xQueueCreate( crfQUEUE_LENGTH, sizeof( unsigned portBASE_TYPE ) );
+	xFlashQueue = xQueueCreate( crfQUEUE_LENGTH, sizeof( UBaseType_t ) );
 
 	if( xFlashQueue )
 	{
@@ -162,21 +167,21 @@ unsigned portBASE_TYPE uxIndex;
 }
 /*-----------------------------------------------------------*/
 
-static void prvFixedDelayCoRoutine( xCoRoutineHandle xHandle, unsigned portBASE_TYPE uxIndex )
+static void prvFixedDelayCoRoutine( CoRoutineHandle_t xHandle, UBaseType_t uxIndex )
 {
 /* Even though this is a co-routine the xResult variable does not need to be
 static as we do not need it to maintain its state between blocks. */
-signed portBASE_TYPE xResult;
+BaseType_t xResult;
 /* The uxIndex parameter of the co-routine function is used as an index into
 the xFlashRates array to obtain the delay period to use. */
-static const portTickType xFlashRates[ crfMAX_FLASH_TASKS ] = { 150 / portTICK_RATE_MS,
-																200 / portTICK_RATE_MS,
-																250 / portTICK_RATE_MS,
-																300 / portTICK_RATE_MS,
-																350 / portTICK_RATE_MS,
-																400 / portTICK_RATE_MS,
-																450 / portTICK_RATE_MS,
-																500  / portTICK_RATE_MS };
+static const TickType_t xFlashRates[ crfMAX_FLASH_TASKS ] = { 150 / portTICK_PERIOD_MS,
+																200 / portTICK_PERIOD_MS,
+																250 / portTICK_PERIOD_MS,
+																300 / portTICK_PERIOD_MS,
+																350 / portTICK_PERIOD_MS,
+																400 / portTICK_PERIOD_MS,
+																450 / portTICK_PERIOD_MS,
+																500  / portTICK_PERIOD_MS };
 
 	/* Co-routines MUST start with a call to crSTART. */
 	crSTART( xHandle );
@@ -203,12 +208,12 @@ static const portTickType xFlashRates[ crfMAX_FLASH_TASKS ] = { 150 / portTICK_R
 }
 /*-----------------------------------------------------------*/
 
-static void prvFlashCoRoutine( xCoRoutineHandle xHandle, unsigned portBASE_TYPE uxIndex )
+static void prvFlashCoRoutine( CoRoutineHandle_t xHandle, UBaseType_t uxIndex )
 {
 /* Even though this is a co-routine the variable do not need to be
 static as we do not need it to maintain their state between blocks. */
-signed portBASE_TYPE xResult;
-unsigned portBASE_TYPE uxLEDToFlash;
+BaseType_t xResult;
+UBaseType_t uxLEDToFlash;
 
 	/* Co-routines MUST start with a call to crSTART. */
 	crSTART( xHandle );
@@ -236,7 +241,7 @@ unsigned portBASE_TYPE uxLEDToFlash;
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xAreFlashCoRoutinesStillRunning( void )
+BaseType_t xAreFlashCoRoutinesStillRunning( void )
 {
 	/* Return pdPASS or pdFAIL depending on whether an error has been detected
 	or not. */

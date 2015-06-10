@@ -1,14 +1,15 @@
 /*
- * FreeRTOS+UDP V1.0.0 (C) 2013 Real Time Engineers ltd.
+ * FreeRTOS+UDP V1.0.4 (C) 2014 Real Time Engineers ltd.
+ * All rights reserved
  *
  * This file is part of the FreeRTOS+UDP distribution.  The FreeRTOS+UDP license
  * terms are different to the FreeRTOS license terms.
  *
- * FreeRTOS+UDP uses a dual license model that allows the software to be used 
- * under a standard GPL open source license, or a commercial license.  The 
- * standard GPL license (unlike the modified GPL license under which FreeRTOS 
- * itself is distributed) requires that all software statically linked with 
- * FreeRTOS+UDP is also distributed under the same GPL V2 license terms.  
+ * FreeRTOS+UDP uses a dual license model that allows the software to be used
+ * under a standard GPL open source license, or a commercial license.  The
+ * standard GPL license (unlike the modified GPL license under which FreeRTOS
+ * itself is distributed) requires that all software statically linked with
+ * FreeRTOS+UDP is also distributed under the same GPL V2 license terms.
  * Details of both license options follow:
  *
  * - Open source licensing -
@@ -135,10 +136,12 @@ made up of the length byte, and minimum one byte value. */
 	#define dhcpCLIENT_PORT 0x4400
 	#define dhcpSERVER_PORT 0x4300
 	#define dhcpCOOKIE		0x63538263
+	#define dhcpBROADCAST	0x0080
 #else
 	#define dhcpCLIENT_PORT 0x0044
 	#define dhcpSERVER_PORT 0x0043
 	#define dhcpCOOKIE		0x63825363
+	#define dhcpBROADCAST	0x8000
 #endif /* ipconfigBYTE_ORDER */
 
 #include "pack_struct_start.h"
@@ -182,7 +185,7 @@ static void prvSendDHCPDiscover( xMACAddress_t *pxMACAddress );
 /*
  * Interpret message received on the DHCP socket.
  */
-static portBASE_TYPE prvProcessDHCPReplies( uint8_t ucExpectedMessageType, xMACAddress_t *pxMACAddress, xNetworkAddressingParameters_t *pxNetworkAddressing );
+static BaseType_t prvProcessDHCPReplies( uint8_t ucExpectedMessageType, xMACAddress_t *pxMACAddress, xNetworkAddressingParameters_t *pxNetworkAddressing );
 
 /*
  * Generate a DHCP request packet, and send it on the DHCP socket.
@@ -218,14 +221,14 @@ static xSocket_t xDHCPSocket = NULL;
 static uint32_t ulTransactionId = 0UL, ulOfferedIPAddress = 0UL, ulDHCPServerAddress = 0UL, ulLeaseTime = 0;
 
 /* Hold information on the current timer state. */
-static portTickType xDHCPTxTime = 0x00, xDHCPTxPeriod = 0x00;
+static TickType_t xDHCPTxTime = 0x00, xDHCPTxPeriod = 0x00;
 
 /* Maintains the DHCP state machine state. */
 static eDHCPState_t eDHCPState = eWaitingSendFirstDiscover;
 
 /*-----------------------------------------------------------*/
 
-void vDHCPProcess( portBASE_TYPE xReset, xMACAddress_t *pxMACAddress, uint32_t *pulIPAddress, xNetworkAddressingParameters_t *pxNetworkAddressing )
+void vDHCPProcess( BaseType_t xReset, xMACAddress_t *pxMACAddress, uint32_t *pulIPAddress, xNetworkAddressingParameters_t *pxNetworkAddressing )
 {
 	if( xReset != pdFALSE )
 	{
@@ -285,7 +288,7 @@ void vDHCPProcess( portBASE_TYPE xReset, xMACAddress_t *pxMACAddress, uint32_t *
 						}
 						taskEXIT_CRITICAL();
 						eDHCPState = eNotUsingLeasedAddress;
-						xTimerStop( xDHCPTimer, ( portTickType ) 0 );
+						xTimerStop( xDHCPTimer, ( TickType_t ) 0 );
 
 						#if ipconfigUSE_NETWORK_EVENT_HOOK == 1
 						{
@@ -296,7 +299,9 @@ void vDHCPProcess( portBASE_TYPE xReset, xMACAddress_t *pxMACAddress, uint32_t *
 						/* Static configuration is being used, so the network is now up. */
 						#if ipconfigFREERTOS_PLUS_NABTO == 1
 						{
-							vStartNabtoTask();
+							/* Return value is used in configASSERT() inside the
+							function. */
+							( void ) xStartNabtoTask();
 						}
 						#endif /* ipconfigFREERTOS_PLUS_NABTO */
 
@@ -324,10 +329,13 @@ void vDHCPProcess( portBASE_TYPE xReset, xMACAddress_t *pxMACAddress, uint32_t *
 				}
 				#endif
 
-				/* Static configuration is being used, so the network is now up. */
+				/* Static configuration is being used, so the network is now
+				up. */
 				#if ipconfigFREERTOS_PLUS_NABTO == 1
 				{
-					vStartNabtoTask();
+					/* Return value is used in configASSERT() inside the
+					function. */
+					( void ) xStartNabtoTask();
 				}
 				#endif /* ipconfigFREERTOS_PLUS_NABTO */
 
@@ -387,7 +395,7 @@ void vDHCPProcess( portBASE_TYPE xReset, xMACAddress_t *pxMACAddress, uint32_t *
 			break;
 
 		case eNotUsingLeasedAddress:
-			xTimerStop( xDHCPTimer, ( portTickType ) 0 );
+			xTimerStop( xDHCPTimer, ( TickType_t ) 0 );
 			break;
 	}
 }
@@ -396,8 +404,8 @@ void vDHCPProcess( portBASE_TYPE xReset, xMACAddress_t *pxMACAddress, uint32_t *
 static void prvCreateDHCPSocket( void )
 {
 struct freertos_sockaddr xAddress;
-portBASE_TYPE xReturn;
-portTickType xTimeoutTime = 0;
+BaseType_t xReturn;
+TickType_t xTimeoutTime = 0;
 
 	/* Create the socket, if it has not already been created. */
 	if( xDHCPSocket == NULL )
@@ -407,8 +415,8 @@ portTickType xTimeoutTime = 0;
 
 		/* Ensure the Rx and Tx timeouts are zero as the DHCP executes in the
 		context of the IP task. */
-		FreeRTOS_setsockopt( xDHCPSocket, 0, FREERTOS_SO_RCVTIMEO, ( void * ) &xTimeoutTime, sizeof( portTickType ) );
-		FreeRTOS_setsockopt( xDHCPSocket, 0, FREERTOS_SO_SNDTIMEO, ( void * ) &xTimeoutTime, sizeof( portTickType ) );
+		FreeRTOS_setsockopt( xDHCPSocket, 0, FREERTOS_SO_RCVTIMEO, ( void * ) &xTimeoutTime, sizeof( TickType_t ) );
+		FreeRTOS_setsockopt( xDHCPSocket, 0, FREERTOS_SO_SNDTIMEO, ( void * ) &xTimeoutTime, sizeof( TickType_t ) );
 
 		/* Bind to the standard DHCP client port. */
 		xAddress.sin_port = dhcpCLIENT_PORT;
@@ -443,7 +451,7 @@ extern void vIPFunctionsTimerCallback( xTimerHandle xTimer );
 
 	if( xDHCPTimer == NULL )
 	{
-		xDHCPTimer = xTimerCreate( ( const signed char * const ) "DHCP", dhcpINITIAL_TIMER_PERIOD, pdTRUE, ( void * ) eDHCPEvent, vIPFunctionsTimerCallback );
+		xDHCPTimer = xTimerCreate( "DHCP", dhcpINITIAL_TIMER_PERIOD, pdTRUE, ( void * ) eDHCPEvent, vIPFunctionsTimerCallback );
 		configASSERT( xDHCPTimer );
 		xTimerStart( xDHCPTimer, portMAX_DELAY );
 	}
@@ -454,7 +462,7 @@ extern void vIPFunctionsTimerCallback( xTimerHandle xTimer );
 }
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE prvProcessDHCPReplies( uint8_t ucExpectedMessageType, xMACAddress_t *pxMACAddress, xNetworkAddressingParameters_t *pxNetworkAddressing )
+static BaseType_t prvProcessDHCPReplies( uint8_t ucExpectedMessageType, xMACAddress_t *pxMACAddress, xNetworkAddressingParameters_t *pxNetworkAddressing )
 {
 uint8_t *pucUDPPayload, *pucLastByte;
 struct freertos_sockaddr xClient;
@@ -463,7 +471,7 @@ int32_t lBytes;
 xDHCPMessage_t *pxDHCPMessage;
 uint8_t *pucByte, ucOptionCode, ucLength;
 uint32_t ulProcessed;
-portBASE_TYPE xReturn = pdFALSE;
+BaseType_t xReturn = pdFALSE;
 const uint32_t ulMandatoryOptions = 2; /* DHCP server address, and the correct DHCP message type must be present in the options. */
 
 	lBytes = FreeRTOS_recvfrom( xDHCPSocket, ( void * ) &pucUDPPayload, 0, FREERTOS_ZERO_COPY, &xClient, &xClientLength );
@@ -640,8 +648,8 @@ uint8_t *pucUDPPayloadBuffer;
 	pxDHCPMessage->ucAddressType = dhcpADDRESS_TYPE_ETHERNET;
 	pxDHCPMessage->ucAddressLength = dhcpETHERNET_ADDRESS_LENGTH;
 	pxDHCPMessage->ulTransactionID = ulTransactionId;
-	pxDHCPMessage->ulYourIPAddress_yiaddr = ulOfferedIPAddress;
 	pxDHCPMessage->ulDHCPCookie = dhcpCOOKIE;
+	pxDHCPMessage->usFlags = dhcpBROADCAST;
 	memcpy( ( void * ) &( pxDHCPMessage->ucClientHardwareAddress[ 0 ] ), ( void * ) pxMACAddress, sizeof( xMACAddress_t ) );
 
 	/* Copy in the const part of the options options. */

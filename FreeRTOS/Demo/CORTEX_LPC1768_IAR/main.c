@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -106,10 +111,10 @@
 
 /* The time between cycles of the 'check' functionality (defined within the
 tick hook). */
-#define mainCHECK_DELAY						( ( portTickType ) 5000 / portTICK_RATE_MS )
+#define mainCHECK_DELAY						( ( TickType_t ) 5000 / portTICK_PERIOD_MS )
 
 /* The toggle rate for the LED. */
-#define mainLED_TOGGLE_RATE					( ( portTickType ) 1000 / portTICK_RATE_MS )
+#define mainLED_TOGGLE_RATE					( ( TickType_t ) 1000 / portTICK_PERIOD_MS )
 
 /* Task priorities. */
 #define mainQUEUE_POLL_PRIORITY				( tskIDLE_PRIORITY + 2 )
@@ -180,13 +185,13 @@ int main( void )
     vStartRecursiveMutexTasks();
 
 	/* Create the simple LED flash task. */
-	xTaskCreate( prvFlashTask, ( signed char * ) "Flash", configMINIMAL_STACK_SIZE, ( void * ) NULL, mainFLASH_TASK_PRIORITY, NULL );
-	
+	xTaskCreate( prvFlashTask, "Flash", configMINIMAL_STACK_SIZE, ( void * ) NULL, mainFLASH_TASK_PRIORITY, NULL );
+
     /* Create the USB task. */
-    xTaskCreate( vUSBTask, ( signed char * ) "USB", configMINIMAL_STACK_SIZE, ( void * ) NULL, tskIDLE_PRIORITY, NULL );
-	
+    xTaskCreate( vUSBTask, "USB", configMINIMAL_STACK_SIZE, ( void * ) NULL, tskIDLE_PRIORITY, NULL );
+
 	/* Create the uIP task.  The WEB server runs in this task. */
-    xTaskCreate( vuIP_Task, ( signed char * ) "uIP", mainBASIC_WEB_STACK_SIZE, ( void * ) NULL, mainUIP_TASK_PRIORITY, NULL );
+    xTaskCreate( vuIP_Task, "uIP", mainBASIC_WEB_STACK_SIZE, ( void * ) NULL, mainUIP_TASK_PRIORITY, NULL );
 
     /* Start the scheduler. */
 	vTaskStartScheduler();
@@ -252,7 +257,7 @@ static unsigned long ulTicksSinceLastDisplay = 0;
 
 static void prvFlashTask( void *pvParameters )
 {
-portTickType xLastFlashTime;
+TickType_t xLastFlashTime;
 
 	/* We need to initialise xLastFlashTime prior to the first call to
 	vTaskDelayUntil(). */
@@ -288,82 +293,82 @@ void prvSetupHardware( void )
 	if ( SC->PLL0STAT & ( 1 << 25 ) )
 	{
 		/* Enable PLL, disconnected. */
-		SC->PLL0CON = 1;			
+		SC->PLL0CON = 1;
 		SC->PLL0FEED = PLLFEED_FEED1;
 		SC->PLL0FEED = PLLFEED_FEED2;
 	}
-	
+
 	/* Disable PLL, disconnected. */
-	SC->PLL0CON = 0;				
+	SC->PLL0CON = 0;
 	SC->PLL0FEED = PLLFEED_FEED1;
 	SC->PLL0FEED = PLLFEED_FEED2;
-	
+
 	/* Enable main OSC. */
-	SC->SCS |= 0x20;			
+	SC->SCS |= 0x20;
 	while( !( SC->SCS & 0x40 ) );
-	
+
 	/* select main OSC, 12MHz, as the PLL clock source. */
-	SC->CLKSRCSEL = 0x1;		
-	
+	SC->CLKSRCSEL = 0x1;
+
 	SC->PLL0CFG = 0x20031;
 	SC->PLL0FEED = PLLFEED_FEED1;
 	SC->PLL0FEED = PLLFEED_FEED2;
-	      
+
 	/* Enable PLL, disconnected. */
-	SC->PLL0CON = 1;				
+	SC->PLL0CON = 1;
 	SC->PLL0FEED = PLLFEED_FEED1;
 	SC->PLL0FEED = PLLFEED_FEED2;
-	
+
 	/* Set clock divider. */
 	SC->CCLKCFG = 0x03;
-	
+
 	/* Configure flash accelerator. */
 	SC->FLASHCFG = 0x403a;
-	
+
 	/* Check lock bit status. */
-	while( ( ( SC->PLL0STAT & ( 1 << 26 ) ) == 0 ) );	
-	
+	while( ( ( SC->PLL0STAT & ( 1 << 26 ) ) == 0 ) );
+
 	/* Enable and connect. */
-	SC->PLL0CON = 3;				
+	SC->PLL0CON = 3;
 	SC->PLL0FEED = PLLFEED_FEED1;
 	SC->PLL0FEED = PLLFEED_FEED2;
-	while( ( ( SC->PLL0STAT & ( 1 << 25 ) ) == 0 ) );	
+	while( ( ( SC->PLL0STAT & ( 1 << 25 ) ) == 0 ) );
 
-	
-	
-	
+
+
+
 	/* Configure the clock for the USB. */
-	
+
 	if( SC->PLL1STAT & ( 1 << 9 ) )
 	{
 		/* Enable PLL, disconnected. */
-		SC->PLL1CON = 1;			
+		SC->PLL1CON = 1;
 		SC->PLL1FEED = PLLFEED_FEED1;
 		SC->PLL1FEED = PLLFEED_FEED2;
 	}
-	
+
 	/* Disable PLL, disconnected. */
-	SC->PLL1CON = 0;				
+	SC->PLL1CON = 0;
 	SC->PLL1FEED = PLLFEED_FEED1;
 	SC->PLL1FEED = PLLFEED_FEED2;
-	
+
 	SC->PLL1CFG = 0x23;
 	SC->PLL1FEED = PLLFEED_FEED1;
 	SC->PLL1FEED = PLLFEED_FEED2;
-	
+
 	/* Enable PLL, disconnected. */
-	SC->PLL1CON = 1;				
+	SC->PLL1CON = 1;
 	SC->PLL1FEED = PLLFEED_FEED1;
 	SC->PLL1FEED = PLLFEED_FEED2;
 	while( ( ( SC->PLL1STAT & ( 1 << 10 ) ) == 0 ) );
-	
+
 	/* Enable and connect. */
-	SC->PLL1CON = 3;				
+	SC->PLL1CON = 3;
 	SC->PLL1FEED = PLLFEED_FEED1;
 	SC->PLL1FEED = PLLFEED_FEED2;
 	while( ( ( SC->PLL1STAT & ( 1 << 9 ) ) == 0 ) );
-	
-	/*  Setup the peripheral bus to be the same as the PLL output (64 MHz). */
+
+	/*  Setup the peripheral bus to be the same as the CPU output (100 MHz). */
 	SC->PCLKSEL0 = 0x05555555;
 
 	/* Configure the LEDs. */
@@ -371,7 +376,7 @@ void prvSetupHardware( void )
 }
 /*-----------------------------------------------------------*/
 
-void vApplicationStackOverflowHook( xTaskHandle pxTask, signed char *pcTaskName )
+void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 {
 	/* This function will get called if a task overflows its stack. */
 

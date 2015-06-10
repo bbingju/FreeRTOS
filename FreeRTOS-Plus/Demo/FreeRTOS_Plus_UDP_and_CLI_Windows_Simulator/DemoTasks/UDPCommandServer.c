@@ -1,21 +1,8 @@
 /*
-    FreeRTOS V7.5.2 - Copyright (C) 2013 Real Time Engineers Ltd.
+    FreeRTOS V8.2.1 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that has become a de facto standard.             *
-     *                                                                       *
-     *    Help yourself get started quickly and support the FreeRTOS         *
-     *    project by purchasing a FreeRTOS tutorial book, reference          *
-     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
-     *                                                                       *
-     *    Thank you!                                                         *
-     *                                                                       *
-    ***************************************************************************
 
     This file is part of the FreeRTOS distribution.
 
@@ -23,37 +10,55 @@
     the terms of the GNU General Public License (version 2) as published by the
     Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
 
-    >>! NOTE: The modification to the GPL is included to allow you to distribute
-    >>! a combined work that includes FreeRTOS without being obliged to provide
-    >>! the source code for proprietary components outside of the FreeRTOS
-    >>! kernel.
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
 
     FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
     link: http://www.freertos.org/a00114.html
 
-    1 tab == 4 spaces!
-
     ***************************************************************************
      *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?"                                     *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
      *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
-    license and Real Time Engineers Ltd. contact details.
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, a DOS
     compatible FAT file system, and our tiny thread aware UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and middleware.
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
 
     http://www.SafeRTOS.com - High Integrity Systems also provide a safety
     engineered and independently SIL3 certified version for use in safety and
@@ -101,13 +106,13 @@ static xSocket_t prvOpenUDPServerSocket( uint16_t usPort );
 
 /*-----------------------------------------------------------*/
 
-void vStartUDPCommandInterpreterTask( uint16_t usStackSize, uint32_t ulPort, unsigned portBASE_TYPE uxPriority )
+void vStartUDPCommandInterpreterTask( uint16_t usStackSize, uint32_t ulPort, UBaseType_t uxPriority )
 {
-	xTaskCreate( vUDPCommandInterpreterTask, ( signed char * ) "CLI", usStackSize, ( void * ) ulPort, uxPriority, NULL );
+	xTaskCreate( vUDPCommandInterpreterTask, "CLI", usStackSize, ( void * ) ulPort, uxPriority, NULL );
 }
 /*-----------------------------------------------------------*/
 
-/* 
+/*
  * Task that provides the input and output for the FreeRTOS+CLI command
  * interpreter.  In this case a UDP port is used.  See the URL in the comments
  * within main.c for the location of the online documentation.
@@ -117,7 +122,7 @@ void vUDPCommandInterpreterTask( void *pvParameters )
 long lBytes, lByte;
 signed char cInChar, cInputIndex = 0;
 static signed char cInputString[ cmdMAX_INPUT_SIZE ], cOutputString[ cmdMAX_OUTPUT_SIZE ], cLocalBuffer[ cmdSOCKET_INPUT_BUFFER_SIZE ];
-portBASE_TYPE xMoreDataToFollow;
+BaseType_t xMoreDataToFollow;
 struct freertos_sockaddr xClient;
 socklen_t xClientAddressLength = 0; /* This is required as a parameter to maintain the sendto() Berkeley sockets API - but it is not actually used so can take any value. */
 xSocket_t xSocket;
@@ -153,25 +158,25 @@ extern const uint8_t ucMACAddress[ 6 ];
 					string. */
 					if( cInChar == '\n' )
 					{
-						/* Process the input string received prior to the 
+						/* Process the input string received prior to the
 						newline. */
 						do
 						{
 							/* Pass the string to FreeRTOS+CLI. */
 							xMoreDataToFollow = FreeRTOS_CLIProcessCommand( cInputString, cOutputString, cmdMAX_OUTPUT_SIZE );
-							
+
 							/* Send the output generated by the command's
 							implementation. */
-							FreeRTOS_sendto( xSocket, cOutputString,  strlen( ( const char * ) cOutputString ), 0, &xClient, xClientAddressLength );
+							FreeRTOS_sendto( xSocket, cOutputString,  strlen( cOutputString ), 0, &xClient, xClientAddressLength );
 
 						} while( xMoreDataToFollow != pdFALSE ); /* Until the command does not generate any more output. */
 
-						/* All the strings generated by the command processing 
-						have been sent.  Clear the input string ready to receive 
+						/* All the strings generated by the command processing
+						have been sent.  Clear the input string ready to receive
 						the next command. */
 						cInputIndex = 0;
 						memset( cInputString, 0x00, cmdMAX_INPUT_SIZE );
-						
+
 						/* Transmit a spacer, just to make the command console
 						easier to read. */
 						FreeRTOS_sendto( xSocket, "\r\n",  strlen( "\r\n" ), 0, &xClient, xClientAddressLength );
@@ -180,12 +185,12 @@ extern const uint8_t ucMACAddress[ 6 ];
 					{
 						if( cInChar == '\r' )
 						{
-							/* Ignore the character.  Newlines are used to 
+							/* Ignore the character.  Newlines are used to
 							detect the end of the input string. */
 						}
 						else if( cInChar == '\b' )
 						{
-							/* Backspace was pressed.  Erase the last character 
+							/* Backspace was pressed.  Erase the last character
 							in the string - if any. */
 							if( cInputIndex > 0 )
 							{
@@ -207,7 +212,7 @@ extern const uint8_t ucMACAddress[ 6 ];
 					}
 				}
 			}
-		} 
+		}
 	}
 	else
 	{
@@ -233,7 +238,7 @@ xSocket_t xSocket = FREERTOS_INVALID_SOCKET;
 
 		/* Bind the address to the socket. */
 		if( FreeRTOS_bind( xSocket, &xServer, sizeof( xServer ) ) == -1 )
-		{			
+		{
 			FreeRTOS_closesocket( xSocket );
 			xSocket = FREERTOS_INVALID_SOCKET;
 		}
